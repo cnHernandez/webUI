@@ -5,12 +5,11 @@ export default function ListaStockCubiertas() {
   const [cubiertas, setCubiertas] = useState<any[]>([]);
 
   useEffect(() => {
-    fetch('http://localhost:5058/api/cubiertas')
-      .then(res => res.ok ? res.json() : [])
-      .then(data => {
-        
-        setCubiertas(data);
-      })
+      fetch('http://localhost:5058/api/cubiertas')
+        .then(res => res.ok ? res.json() : [])
+        .then(data => {
+          setCubiertas(data);
+        })
       .catch(() => setCubiertas([]));
   }, []);
 

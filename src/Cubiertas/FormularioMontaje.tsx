@@ -1,41 +1,65 @@
-import type { Colectivo } from '../models/Colectivo';
-import type { Cubierta } from '../models/Cubierta';
-import { ubicacionesCubierta } from '../serviceCubierta/listarUbicaciones';
 import { useState, useEffect } from 'react';
-import { crearMontaje } from '../serviceCubierta/crearMontaje';
+import { ubicacionesCubierta } from '../serviceCubierta/listarUbicaciones';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
+
 function FormularioMontaje() {
   const [cubiertaActual, setCubiertaActual] = useState<any|null>(null);
   const [mostrarCartel, setMostrarCartel] = useState(false);
   const [confirmarReemplazo, setConfirmarReemplazo] = useState(false);
-  // ...existing code...
-  // Importar ubicaciones dentro del scope de la función
-// ...existing code...
   const [idCubierta, setIdCubierta] = useState('');
   const [idColectivo, setIdColectivo] = useState('');
   const [idUbicacion, setIdUbicacion] = useState('');
   const [motivoCambio, setMotivoCambio] = useState('');
-  const [colectivos, setColectivos] = useState<Colectivo[]>([]);
-  const [cubiertas, setCubiertas] = useState<Cubierta[]>([]);
+  const [colectivos, setColectivos] = useState<any[]>([]);
+  const [cubiertas, setCubiertas] = useState<any[]>([]);
   const [mensaje, setMensaje] = useState('');
 
   useEffect(() => {
     listarColectivos().then((data) => setColectivos(data));
-    listarCubiertas().then((data) => setCubiertas(data));
+    listarCubiertas().then((data) => {
+      setCubiertas(data);
+    });
   }, []);
 
-  // Consultar cubierta actual cuando cambian colectivo y ubicación
+  // Consultar montaje actual cuando cambian colectivo y ubicación
   useEffect(() => {
     if (idColectivo && idUbicacion) {
-      import('../serviceCubierta/consultarMontajeActual').then(({ consultarMontajeActual }) => {
-        consultarMontajeActual(Number(idColectivo), Number(idUbicacion)).then(data => {
+      fetch(`http://localhost:5058/api/montajes/actual/${idColectivo}/${idUbicacion}`)
+    .then(async (res) => {
+      // El backend responde 200 OK con null si no hay montaje
+      if (!res.ok) {
+        setCubiertaActual(null);
+        return null;
+      }
+      const contentType = res.headers.get('content-type');
+      const contentLength = res.headers.get('content-length');
+      if (!contentType?.includes('application/json') || contentLength === '0') {
+        setCubiertaActual(null);
+        return null;
+      }
+      const text = await res.text();
+      if (!text) {
+        setCubiertaActual(null);
+        return null;
+      }
+      const data = JSON.parse(text);
+      if (!data) {
+        setCubiertaActual(null);
+        return null;
+      }
+      setCubiertaActual(data);
+      return data;
+    })
+        .then((data: any) => {
           setCubiertaActual(data);
-          // Mostrar cartel solo si hay cubierta actual y es distinta a la seleccionada
-          setMostrarCartel(!!data && String(data.IdCubierta) !== idCubierta);
+          if (data && typeof data === 'object' && data.idCubierta !== undefined) {
+            setMostrarCartel(String(data.idCubierta) !== idCubierta);
+          } else {
+            setMostrarCartel(false);
+          }
           setConfirmarReemplazo(false);
         });
-      });
     } else {
       setCubiertaActual(null);
       setMostrarCartel(false);
@@ -51,12 +75,19 @@ function FormularioMontaje() {
       setMensaje('Ya existe una cubierta en ese colectivo y ubicación. Confirma el reemplazo.');
       return;
     }
-    const result = await crearMontaje({
+    // Enviar DTO al backend
+    const dto = {
       IdCubierta: Number(idCubierta),
       IdColectivo: Number(idColectivo),
       IdUbicacion: Number(idUbicacion),
       MotivoCambio: motivoCambio
+    };
+    const res = await fetch('http://localhost:5058/api/montajes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(dto)
     });
+    const result = await res.text();
     setMensaje(result);
     if (result === 'Montaje guardado correctamente') {
       setIdCubierta('');
@@ -66,6 +97,8 @@ function FormularioMontaje() {
       setCubiertaActual(null);
       setMostrarCartel(false);
       setConfirmarReemplazo(false);
+            setIdColectivo('0');
+            setIdUbicacion('0');
     }
   };
 
@@ -76,7 +109,8 @@ function FormularioMontaje() {
         <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontWeight: '500' }}>
           <div>
             <span>Cubierta actual en este colectivo y ubicación:</span><br />
-            <span>Nro. Serie: <b>{cubiertaActual.NroSerie}</b></span> | <span>Estado: <b>{cubiertaActual.Estado}</b></span>
+            <span>Nro. Serie: <b>{cubiertaActual.nroSerieCubierta ?? cubiertaActual.NroSerieCubierta ?? cubiertaActual.NroSerie ?? ''}</b></span>
+            {cubiertaActual.estado && <> | <span>Estado: <b>{cubiertaActual.estado}</b></span></>}
           </div>
           <button type="button" style={{ marginTop: '0.5rem', background: '#b91c1c', color: 'white', padding: '0.4rem 1rem', borderRadius: '6px', border: 'none', fontWeight: '500', cursor: 'pointer' }} onClick={() => setConfirmarReemplazo(true)}>
             Confirmar reemplazo
