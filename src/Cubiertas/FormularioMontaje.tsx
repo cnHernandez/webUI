@@ -148,9 +148,17 @@ function FormularioMontaje() {
                 ))}
               </select>
             </label>
-            <label style={{ fontWeight: '500', color: '#000', display: 'block' }}>Motivo
-              <input type="text" placeholder="Motivo del cambio" value={motivoCambio} onChange={e => setMotivoCambio(e.target.value)} style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '0.5rem', width: '100%', marginTop: '0.25rem' }} />
-            </label>
+              {cubiertaActual && mostrarCartel && (
+                <label style={{ fontWeight: '500', color: '#000', display: 'block' }}>Motivo de cambio:
+                  <input
+                      type="text"
+                      id="motivoCambio"
+                      value={motivoCambio}
+                      onChange={e => setMotivoCambio(e.target.value)}
+                      style={{ width: '100%', border: '1px solid #ccc', borderRadius: '6px', padding: '0.5rem', marginTop: '0.25rem' }}
+                  />
+                </label>
+              )}
           </div>
         </div>
         <button type="submit" style={{ background: '#2563eb', color: 'white', padding: '0.5rem 1.5rem', borderRadius: '6px', marginTop: '1.5rem', alignSelf: 'center', width: '160px', fontWeight: '500', fontSize: '1rem', cursor: 'pointer', border: 'none' }}>Guardar Montaje</button>
