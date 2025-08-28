@@ -27,33 +27,33 @@ const HistorialMontajeCubierta: React.FC<Props> = ({ idCubierta, onVolver }) => 
       });
   }, [idCubierta]);
 
-  if (loading) return <div>Cargando historial...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="p-4">Cargando historial...</div>;
+  if (error) return <div className="p-4 text-red-600">{error}</div>;
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <h2 style={{ color: '#000' }}>Historial de Montajes de Cubierta</h2>
-      {onVolver && <button onClick={onVolver} style={{ marginBottom: '1rem' }}>Volver</button>}
-      <table style={{ width: '100%', borderCollapse: 'collapse', color: '#000' }}>
+    <div className="p-4">
+      <h2 className="text-xl font-bold mb-4 text-black">Historial de Montajes de Cubierta</h2>
+      {onVolver && <button onClick={onVolver} className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-md">Volver</button>}
+      <table className="w-full border-collapse text-black">
         <thead>
           <tr>
-            <th style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000' }}>Fecha Montaje</th>
-            <th style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000' }}>Nro Serie</th>
-            <th style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000' }}>Colectivo</th>
-            <th style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000' }}>Ubicación</th>
-            <th style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000' }}>Fecha Desinstalación</th>
-            <th style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000' }}>Motivo Cambio</th>
+            <th className="border border-gray-300 p-2">Fecha Montaje</th>
+            <th className="border border-gray-300 p-2">Nro Serie</th>
+            <th className="border border-gray-300 p-2">Colectivo</th>
+            <th className="border border-gray-300 p-2">Ubicación</th>
+            <th className="border border-gray-300 p-2">Fecha Desinstalación</th>
+            <th className="border border-gray-300 p-2">Motivo Cambio</th>
           </tr>
         </thead>
         <tbody>
           {historial.map((h, i) => (
             <tr key={i}>
-              <td style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000', textAlign: 'center' }}>{h.fechaMontaje ? new Date(h.fechaMontaje).toLocaleString() : '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000', textAlign: 'center' }}>{h.nroSerieCubierta || '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000', textAlign: 'center' }}>{h.nroColectivo || '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000', textAlign: 'center' }}>{h.descripcionUbicacion || '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000', textAlign: 'center' }}>{h.fechaDesinstalacion ? new Date(h.fechaDesinstalacion).toLocaleString() : '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '0.5rem', color: '#000', textAlign: 'center' }}>{h.motivoCambio || '-'}</td>
+              <td className="border border-gray-300 p-2 text-center">{h.fechaMontaje ? new Date(h.fechaMontaje).toLocaleString() : '-'}</td>
+              <td className="border border-gray-300 p-2 text-center">{h.nroSerieCubierta || '-'}</td>
+              <td className="border border-gray-300 p-2 text-center">{h.nroColectivo || '-'}</td>
+              <td className="border border-gray-300 p-2 text-center">{h.descripcionUbicacion || '-'}</td>
+              <td className="border border-gray-300 p-2 text-center">{h.fechaDesinstalacion ? new Date(h.fechaDesinstalacion).toLocaleString() : '-'}</td>
+              <td className="border border-gray-300 p-2 text-center">{h.motivoCambio || '-'}</td>
             </tr>
           ))}
         </tbody>
