@@ -7,27 +7,27 @@ import { useState } from 'react';
 function App() {
   const [tab, setTab] = useState<'ingreso' | 'rotacion' | 'stock'>('ingreso');
   return (
-    <div style={{ minHeight: '100vh', width: '100vw', background: '#fff', display: 'flex', flexDirection: 'column' }}>
+    <div className="min-h-screen w-screen bg-white flex flex-col">
       <Menu />
-      <div style={{ width: '100vw', background: '#fff', borderRadius: '0', boxShadow: 'none', padding: '0' }}>
-        <div style={{ display: 'flex', gap: '1rem', borderBottom: '1px solid #e5e7eb', padding: '1rem 0 0.5rem 0', justifyContent: 'center' }}>
+      <div className="w-screen bg-white rounded-none shadow-none p-0">
+        <div className="flex gap-4 border-b border-gray-200 pt-4 pb-2 justify-center">
           <button
-            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem 0.5rem 0 0', fontWeight: '600', background: tab === 'ingreso' ? '#dbeafe' : '#f3f4f6', color: tab === 'ingreso' ? '#1d4ed8' : '#4b5563', border: 'none' }}
+            className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'ingreso' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
             onClick={() => setTab('ingreso')}
           >Ingreso</button>
           <button
-            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem 0.5rem 0 0', fontWeight: '600', background: tab === 'rotacion' ? '#dbeafe' : '#f3f4f6', color: tab === 'rotacion' ? '#1d4ed8' : '#4b5563', border: 'none' }}
+            className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'rotacion' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
             onClick={() => setTab('rotacion')}
           >Rotación</button>
           <button
-            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem 0.5rem 0 0', fontWeight: '600', background: tab === 'stock' ? '#dbeafe' : '#f3f4f6', color: tab === 'stock' ? '#1d4ed8' : '#4b5563', border: 'none' }}
+            className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'stock' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
             onClick={() => setTab('stock')}
           >Stock</button>
         </div>
         {tab === 'ingreso' && <FormularioCubierta />}
         {tab === 'rotacion' && <FormularioMontaje />}
         {tab === 'stock' && (
-          <div style={{ padding: '2rem 0' }}>
+          <div className="py-8">
             <ListaStockCubiertas />
           </div>
         )}

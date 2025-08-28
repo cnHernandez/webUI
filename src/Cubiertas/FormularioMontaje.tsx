@@ -104,33 +104,33 @@ function FormularioMontaje() {
 
   return (
     <div>
-      <h2 style={{ fontSize: '1.25rem', fontWeight: 'bold', marginBottom: '1rem' }}>Montar/Rotar Cubierta</h2>
+      <h2 className="text-xl font-bold mb-4">Montar/Rotar Cubierta</h2>
       {cubiertaActual && mostrarCartel && !confirmarReemplazo && (
-        <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', textAlign: 'center', fontWeight: '500' }}>
+        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
           <div>
             <span>Cubierta actual en este colectivo y ubicación:</span><br />
             <span>Nro. Serie: <b>{cubiertaActual.nroSerieCubierta ?? cubiertaActual.NroSerieCubierta ?? cubiertaActual.NroSerie ?? ''}</b></span>
             {cubiertaActual.estado && <> | <span>Estado: <b>{cubiertaActual.estado}</b></span></>}
           </div>
-          <button type="button" style={{ marginTop: '0.5rem', background: '#b91c1c', color: 'white', padding: '0.4rem 1rem', borderRadius: '6px', border: 'none', fontWeight: '500', cursor: 'pointer' }} onClick={() => setConfirmarReemplazo(true)}>
+          <button type="button" className="mt-2 bg-red-700 text-white py-2 px-4 rounded-md font-medium cursor-pointer border-none" onClick={() => setConfirmarReemplazo(true)}>
             Confirmar reemplazo
           </button>
         </div>
       )}
-      <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div style={{ display: 'flex', flexDirection: 'row', gap: '2rem', justifyContent: 'center' }}>
+      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+        <div className="flex flex-row gap-8 justify-center">
           {/* Columna 1 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: '220px' }}>
-            <label style={{ fontWeight: '500', color: '#000', display: 'block' }}>Cubierta
-              <select value={idCubierta} onChange={e => setIdCubierta(e.target.value)} required style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '0.5rem', width: '100%', marginTop: '0.25rem' }}>
+          <div className="flex flex-col gap-4 min-w-[220px]">
+            <label className="font-medium text-black block">Cubierta
+              <select value={idCubierta} onChange={e => setIdCubierta(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1">
                 <option value="">Seleccionar Cubierta</option>
                 {cubiertas.map((c, i) => (
                   <option key={c.idCubierta ?? i} value={c.idCubierta}>{c.nroSerie}</option>
                 ))}
               </select>
             </label>
-            <label style={{ fontWeight: '500', color: '#000', display: 'block' }}>Colectivo
-              <select value={idColectivo} onChange={e => setIdColectivo(e.target.value)} required style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '0.5rem', width: '100%', marginTop: '0.25rem' }}>
+            <label className="font-medium text-black block">Colectivo
+              <select value={idColectivo} onChange={e => setIdColectivo(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1">
                 <option value="">Seleccionar Colectivo</option>
                 {colectivos.map((c: any, i: number) => (
                   <option key={c.IdColectivo ?? i} value={c.IdColectivo}>{c.NroColectivo}</option>
@@ -139,9 +139,9 @@ function FormularioMontaje() {
             </label>
           </div>
           {/* Columna 2 */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', minWidth: '220px' }}>
-            <label style={{ fontWeight: '500', color: '#000', display: 'block' }}>Ubicación
-              <select value={idUbicacion} onChange={e => setIdUbicacion(e.target.value)} required style={{ border: '1px solid #ccc', borderRadius: '6px', padding: '0.5rem', width: '100%', marginTop: '0.25rem' }}>
+          <div className="flex flex-col gap-4 min-w-[220px]">
+            <label className="font-medium text-black block">Ubicación
+              <select value={idUbicacion} onChange={e => setIdUbicacion(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1">
                 <option value="">Seleccionar Ubicación</option>
                 {ubicacionesCubierta.map(u => (
                   <option key={u.IdUbicacion} value={u.IdUbicacion}>{u.Descripcion}</option>
@@ -149,21 +149,21 @@ function FormularioMontaje() {
               </select>
             </label>
               {cubiertaActual && mostrarCartel && (
-                <label style={{ fontWeight: '500', color: '#000', display: 'block' }}>Motivo de cambio:
+                <label className="font-medium text-black block">Motivo de cambio:
                   <input
                       type="text"
                       id="motivoCambio"
                       value={motivoCambio}
                       onChange={e => setMotivoCambio(e.target.value)}
-                      style={{ width: '100%', border: '1px solid #ccc', borderRadius: '6px', padding: '0.5rem', marginTop: '0.25rem' }}
+                      className="w-full border border-gray-300 rounded-md p-2 mt-1"
                   />
                 </label>
               )}
           </div>
         </div>
-        <button type="submit" style={{ background: '#2563eb', color: 'white', padding: '0.5rem 1.5rem', borderRadius: '6px', marginTop: '1.5rem', alignSelf: 'center', width: '160px', fontWeight: '500', fontSize: '1rem', cursor: 'pointer', border: 'none' }}>Guardar Montaje</button>
+        <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none">Guardar Montaje</button>
       </form>
-      {mensaje && <p style={{ marginTop: '1rem', fontSize: '0.95rem', color: mensaje.includes('correctamente') ? '#16a34a' : '#dc2626' }}>{mensaje}</p>}
+      {mensaje && <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>}
     </div>
   );
 }
