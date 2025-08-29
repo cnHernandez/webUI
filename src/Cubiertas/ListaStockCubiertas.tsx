@@ -4,12 +4,14 @@ import HistorialMontajeCubierta from './HistorialMontajeCubierta';
 
 
 const ListaStockCubiertas: React.FC = () => {
+  const [filtroEstado, setFiltroEstado] = useState('');
   const [cubiertas, setCubiertas] = useState<any[]>([]);
   const [cubiertaHistorialId, setCubiertaHistorialId] = useState<number | null>(null);
   const [colectivosCubierta, setColectivosCubierta] = useState<{ [idCubierta: number]: string }>({});
   // Filtros
   const [filtroLibres, setFiltroLibres] = useState(false);
-  const [filtroColectivo, setFiltroColectivo] = useState('');
+  const [inputColectivo, setInputColectivo] = useState('');
+  const [inputNroCubierta, setInputNroCubierta] = useState('');
   // Estado para colectivos desde la base de datos
   const [colectivosBD, setColectivosBD] = useState<{ idColectivo: number; nroColectivo: string }[]>([]);
 
@@ -22,7 +24,6 @@ const ListaStockCubiertas: React.FC = () => {
       })
       .catch(() => setColectivosBD([]));
   }, []);
-  const [filtroEstado, setFiltroEstado] = useState('');
 
   useEffect(() => {
     fetch('http://localhost:5058/api/cubiertas')
@@ -72,11 +73,15 @@ const ListaStockCubiertas: React.FC = () => {
       const sinColectivo = !colectivosCubierta[c.idCubierta] || colectivosCubierta[c.idCubierta] === '-';
       if (!(sinUbicacion && sinColectivo)) return false;
     }
-    // Filtro 2: Por número de colectivo
-    if (filtroColectivo.trim() !== '') {
-      if (colectivosCubierta[c.idCubierta] !== filtroColectivo.trim()) return false;
+    // Filtro 2: Por número de colectivo (solo input)
+    if (inputColectivo.trim() !== '') {
+      if (!colectivosCubierta[c.idCubierta] || !colectivosCubierta[c.idCubierta].toLowerCase().includes(inputColectivo.trim().toLowerCase())) return false;
     }
-    // Filtro 3: Por estado
+    // Filtro 3: Por número de cubierta (solo input)
+    if (inputNroCubierta.trim() !== '') {
+      if (!c.nroSerie || !c.nroSerie.toLowerCase().includes(inputNroCubierta.trim().toLowerCase())) return false;
+    }
+    // Filtro 4: Por estado (solo select)
     if (filtroEstado !== '') {
       if (!c.estadoInfo || c.estadoInfo.estado !== filtroEstado) return false;
     }
@@ -106,21 +111,35 @@ const ListaStockCubiertas: React.FC = () => {
             </label>
             <span className="text-xs text-gray-500 mt-1">Sin ubicación y sin colectivo</span>
           </div>
-          {/* Filtro 2: Nro Colectivo (select desde BD) */}
+          {/* Filtro 2: Nro Colectivo (solo input) */}
           <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
-            <label className="font-medium mb-1">Colectivo</label>
-            <select
-              value={filtroColectivo}
-              onChange={e => setFiltroColectivo(e.target.value)}
+            <label className="font-medium mb-1">Nro Colectivo</label>
+            <input
+              type="text"
+              value={inputColectivo}
+              onChange={e => setInputColectivo(e.target.value)}
+              placeholder="Filtrar por colectivo..."
               className="border rounded px-2 py-1 w-full"
-            >
-              <option value="">Todos</option>
+              list="colectivo-list"
+            />
+            <datalist id="colectivo-list">
               {colectivosBD.map((colectivo) => (
-                <option key={String(colectivo.idColectivo)} value={colectivo.nroColectivo}>{colectivo.nroColectivo}</option>
+                <option key={String(colectivo.idColectivo)} value={colectivo.nroColectivo} />
               ))}
-            </select>
+            </datalist>
           </div>
-          {/* Filtro 3: Estado */}
+          {/* Filtro 3: Nro Cubierta (solo input) */}
+          <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+            <label className="font-medium mb-1">Nro Cubierta</label>
+            <input
+              type="text"
+              value={inputNroCubierta}
+              onChange={e => setInputNroCubierta(e.target.value)}
+              placeholder="Filtrar por nro cubierta..."
+              className="border rounded px-2 py-1 w-full"
+            />
+          </div>
+          {/* Filtro 4: Estado (solo select) */}
           <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
             <label className="font-medium mb-1">Estado</label>
             <select
