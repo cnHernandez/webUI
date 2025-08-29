@@ -7,6 +7,22 @@ const ListaStockCubiertas: React.FC = () => {
   const [cubiertas, setCubiertas] = useState<any[]>([]);
   const [cubiertaHistorialId, setCubiertaHistorialId] = useState<number | null>(null);
   const [colectivosCubierta, setColectivosCubierta] = useState<{ [idCubierta: number]: string }>({});
+  // Filtros
+  const [filtroLibres, setFiltroLibres] = useState(false);
+  const [filtroColectivo, setFiltroColectivo] = useState('');
+  // Estado para colectivos desde la base de datos
+  const [colectivosBD, setColectivosBD] = useState<{ idColectivo: number; nroColectivo: string }[]>([]);
+
+  // Obtener lista de colectivos desde la base de datos al montar
+  useEffect(() => {
+    fetch('http://localhost:5058/api/colectivos')
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        setColectivosBD(Array.isArray(data) ? data : []);
+      })
+      .catch(() => setColectivosBD([]));
+  }, []);
+  const [filtroEstado, setFiltroEstado] = useState('');
 
   useEffect(() => {
     fetch('http://localhost:5058/api/cubiertas')
@@ -48,6 +64,25 @@ const ListaStockCubiertas: React.FC = () => {
       });
   }, []);
 
+  // Filtrado de cubiertas
+  const cubiertasFiltradas = cubiertas.filter((c) => {
+    // Filtro 1: Libres (sin ubicación y sin colectivo)
+    if (filtroLibres) {
+      const sinUbicacion = !c.ubicacionDescripcion || c.ubicacionDescripcion.trim() === '';
+      const sinColectivo = !colectivosCubierta[c.idCubierta] || colectivosCubierta[c.idCubierta] === '-';
+      if (!(sinUbicacion && sinColectivo)) return false;
+    }
+    // Filtro 2: Por número de colectivo
+    if (filtroColectivo.trim() !== '') {
+      if (colectivosCubierta[c.idCubierta] !== filtroColectivo.trim()) return false;
+    }
+    // Filtro 3: Por estado
+    if (filtroEstado !== '') {
+      if (!c.estadoInfo || c.estadoInfo.estado !== filtroEstado) return false;
+    }
+    return true;
+  });
+
   if (cubiertaHistorialId !== null) {
     const handleVolver = () => setCubiertaHistorialId(null);
     return <HistorialMontajeCubierta idCubierta={cubiertaHistorialId} onVolver={handleVolver} />;
@@ -56,6 +91,49 @@ const ListaStockCubiertas: React.FC = () => {
   return (
     <div className="p-4">
       <h2 className="text-xl font-bold mb-4">Stock de Cubiertas</h2>
+      {/* Filtros */}
+  <div className="flex flex-row justify-center gap-16 mb-6 items-center">
+        {/* Filtro 1: Libres */}
+        <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+          <label className="flex items-center gap-2">
+            <input
+              type="checkbox"
+              checked={filtroLibres}
+              onChange={e => setFiltroLibres(e.target.checked)}
+            />
+            <span className="font-medium">Libres</span>
+          </label>
+          <span className="text-xs text-gray-500 mt-1">Sin ubicación y sin colectivo</span>
+        </div>
+        {/* Filtro 2: Nro Colectivo (select desde BD) */}
+        <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+          <label className="font-medium mb-1">Colectivo</label>
+          <select
+            value={filtroColectivo}
+            onChange={e => setFiltroColectivo(e.target.value)}
+            className="border rounded px-2 py-1 w-full"
+          >
+            <option value="">Todos</option>
+            {colectivosBD.map((colectivo) => (
+              <option key={String(colectivo.idColectivo)} value={colectivo.nroColectivo}>{colectivo.nroColectivo}</option>
+            ))}
+          </select>
+        </div>
+        {/* Filtro 3: Estado */}
+        <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+          <label className="font-medium mb-1">Estado</label>
+          <select
+            value={filtroEstado}
+            onChange={e => setFiltroEstado(e.target.value)}
+            className="border rounded px-2 py-1 w-full"
+          >
+            <option value="">Todos</option>
+            <option value="Nueva">Nueva</option>
+            <option value="Recapada">Recapada</option>
+            <option value="DobleRecapada">Doble Recapada</option>
+          </select>
+        </div>
+      </div>
       <table className="w-full border-collapse text-black">
         <thead>
           <tr>
@@ -68,7 +146,7 @@ const ListaStockCubiertas: React.FC = () => {
           </tr>
         </thead>
         <tbody>
-          {cubiertas.map((c, i) => (
+          {cubiertasFiltradas.map((c, i) => (
             <tr key={c.idCubierta ?? i} className="cursor-pointer hover:bg-blue-50" onClick={() => setCubiertaHistorialId(c.idCubierta)}>
               <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
               <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
