@@ -89,75 +89,77 @@ const ListaStockCubiertas: React.FC = () => {
   }
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Stock de Cubiertas</h2>
-      {/* Filtros */}
-  <div className="flex flex-row justify-center gap-16 mb-6 items-center">
-        {/* Filtro 1: Libres */}
-        <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
-          <label className="flex items-center gap-2">
-            <input
-              type="checkbox"
-              checked={filtroLibres}
-              onChange={e => setFiltroLibres(e.target.checked)}
-            />
-            <span className="font-medium">Libres</span>
-          </label>
-          <span className="text-xs text-gray-500 mt-1">Sin ubicación y sin colectivo</span>
+    <div className="w-full bg-blue-100 py-12">
+      <div className="max-w-5xl mx-auto p-8 bg-white rounded-xl shadow-lg">
+        <h2 className="text-xl font-bold mb-4">Stock de Cubiertas</h2>
+        {/* Filtros */}
+        <div className="flex flex-row justify-center gap-16 mb-6 items-center">
+          {/* Filtro 1: Libres */}
+          <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={filtroLibres}
+                onChange={e => setFiltroLibres(e.target.checked)}
+              />
+              <span className="font-medium">Libres</span>
+            </label>
+            <span className="text-xs text-gray-500 mt-1">Sin ubicación y sin colectivo</span>
+          </div>
+          {/* Filtro 2: Nro Colectivo (select desde BD) */}
+          <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+            <label className="font-medium mb-1">Colectivo</label>
+            <select
+              value={filtroColectivo}
+              onChange={e => setFiltroColectivo(e.target.value)}
+              className="border rounded px-2 py-1 w-full"
+            >
+              <option value="">Todos</option>
+              {colectivosBD.map((colectivo) => (
+                <option key={String(colectivo.idColectivo)} value={colectivo.nroColectivo}>{colectivo.nroColectivo}</option>
+              ))}
+            </select>
+          </div>
+          {/* Filtro 3: Estado */}
+          <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+            <label className="font-medium mb-1">Estado</label>
+            <select
+              value={filtroEstado}
+              onChange={e => setFiltroEstado(e.target.value)}
+              className="border rounded px-2 py-1 w-full"
+            >
+              <option value="">Todos</option>
+              <option value="Nueva">Nueva</option>
+              <option value="Recapada">Recapada</option>
+              <option value="DobleRecapada">Doble Recapada</option>
+            </select>
+          </div>
         </div>
-        {/* Filtro 2: Nro Colectivo (select desde BD) */}
-        <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
-          <label className="font-medium mb-1">Colectivo</label>
-          <select
-            value={filtroColectivo}
-            onChange={e => setFiltroColectivo(e.target.value)}
-            className="border rounded px-2 py-1 w-full"
-          >
-            <option value="">Todos</option>
-            {colectivosBD.map((colectivo) => (
-              <option key={String(colectivo.idColectivo)} value={colectivo.nroColectivo}>{colectivo.nroColectivo}</option>
-            ))}
-          </select>
-        </div>
-        {/* Filtro 3: Estado */}
-        <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
-          <label className="font-medium mb-1">Estado</label>
-          <select
-            value={filtroEstado}
-            onChange={e => setFiltroEstado(e.target.value)}
-            className="border rounded px-2 py-1 w-full"
-          >
-            <option value="">Todos</option>
-            <option value="Nueva">Nueva</option>
-            <option value="Recapada">Recapada</option>
-            <option value="DobleRecapada">Doble Recapada</option>
-          </select>
-        </div>
-      </div>
-      <table className="w-full border-collapse text-black">
-        <thead>
-          <tr>
-            <th className="border border-gray-300 p-2 text-center">Nro Serie</th>
-            <th className="border border-gray-300 p-2 text-center">Marca</th>
-            <th className="border border-gray-300 p-2 text-center">Medida</th>
-            <th className="border border-gray-300 p-2 text-center">Estado</th>
-            <th className="border border-gray-300 p-2 text-center">Colectivo</th>
-            <th className="border border-gray-300 p-2 text-center">Ubicación</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cubiertasFiltradas.map((c, i) => (
-            <tr key={c.idCubierta ?? i} className="cursor-pointer hover:bg-blue-50" onClick={() => setCubiertaHistorialId(c.idCubierta)}>
-              <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
-              <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
-              <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>
-              <td className="border border-gray-300 p-2 text-center">{c.estadoInfo?.estado || '-'}</td>
-              <td className="border border-gray-300 p-2 text-center">{colectivosCubierta[c.idCubierta] || '-'}</td>
-              <td className="border border-gray-300 p-2 text-center">{c.ubicacionDescripcion && c.ubicacionDescripcion.trim() !== '' ? c.ubicacionDescripcion : '-'}</td>
+        <table className="w-full border-collapse text-black">
+          <thead>
+            <tr>
+              <th className="border border-gray-300 p-2 text-center">Nro Serie</th>
+              <th className="border border-gray-300 p-2 text-center">Marca</th>
+              <th className="border border-gray-300 p-2 text-center">Medida</th>
+              <th className="border border-gray-300 p-2 text-center">Estado</th>
+              <th className="border border-gray-300 p-2 text-center">Colectivo</th>
+              <th className="border border-gray-300 p-2 text-center">Ubicación</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {cubiertasFiltradas.map((c, i) => (
+              <tr key={c.idCubierta ?? i} className="cursor-pointer hover:bg-blue-50" onClick={() => setCubiertaHistorialId(c.idCubierta)}>
+                <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
+                <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
+                <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>
+                <td className="border border-gray-300 p-2 text-center">{c.estadoInfo?.estado || '-'}</td>
+                <td className="border border-gray-300 p-2 text-center">{colectivosCubierta[c.idCubierta] || '-'}</td>
+                <td className="border border-gray-300 p-2 text-center">{c.ubicacionDescripcion && c.ubicacionDescripcion.trim() !== '' ? c.ubicacionDescripcion : '-'}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };
