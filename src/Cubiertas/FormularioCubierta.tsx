@@ -7,11 +7,12 @@ import { obtenerCubiertaPorNroSerie } from '../serviceCubierta/obtenerCubiertaPo
 export default function FormularioCubierta() {
   const [nroSerie, setNroSerie] = useState('');
   const [marca, setMarca] = useState('');
-  const [medida, setMedida] = useState('');
+  const [medida, setMedida] = useState('295/80 R22.5');
   const [fechaCompra, setFechaCompra] = useState('');
   const [estado, setEstado] = useState('Nueva');
   const [fechaRecapado, setFechaRecapado] = useState('');
   const [fechaDobleRecapada, setFechaDobleRecapada] = useState('');
+  const [motivoCambio, setMotivoCambio] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [editando, setEditando] = useState(false);
 
@@ -24,7 +25,13 @@ export default function FormularioCubierta() {
       if (estado === 'En Reparación') estadoEnviar = 'EnReparacion';
       if (estado === 'en reparacion') estadoEnviar = 'EnReparacion';
       if (estado === 'enReparacion') estadoEnviar = 'EnReparacion';
-      const result = await actualizarEstadoCubierta(nroSerie, estadoEnviar, fechaRecapado, fechaDobleRecapada);
+      const result = await actualizarEstadoCubierta(
+        nroSerie,
+        estadoEnviar,
+        fechaRecapado,
+        fechaDobleRecapada,
+        estadoEnviar === 'EnReparacion' ? motivoCambio : undefined
+      );
       setMensaje(result);
       setNroSerie('');
       setMarca('');
@@ -33,6 +40,7 @@ export default function FormularioCubierta() {
       setEstado('Nueva');
       setFechaRecapado('');
       setFechaDobleRecapada('');
+      setMotivoCambio('');
       setEditando(false);
       return;
     }
@@ -139,8 +147,8 @@ export default function FormularioCubierta() {
               <label className="font-medium text-black block">Medida
                 <input
                   type="text"
-                  value="295/80 R22.5"
-                  readOnly
+                  value={medida}
+                  onChange={e => setMedida(e.target.value)}
                   className={`border border-gray-300 rounded-md p-2 w-full mt-1 text-black bg-gray-100`}
                 />
               </label>
@@ -166,6 +174,17 @@ export default function FormularioCubierta() {
               {estado === 'DobleRecapada' && (
                 <label className="font-medium text-black block mt-0">Fecha de doble recapada
                   <input type="date" value={fechaDobleRecapada} onChange={e => setFechaDobleRecapada(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-0 text-white bg-gray-800" />
+                </label>
+              )}
+              {(estado === 'EnReparacion' || estado === 'En Reparación') && (
+                <label className="font-medium text-black block mt-0">Motivo de cambio
+                  <select value={motivoCambio} onChange={e => setMotivoCambio(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1">
+                    <option value="">Seleccionar motivo...</option>
+                    <option value="PINCHADO">PINCHADO</option>
+                    <option value="MAL DESGASTE">MAL DESGASTE</option>
+                    <option value="DESGASTE">DESGASTE</option>
+                    <option value="RUPTURA">RUPTURA</option>
+                  </select>
                 </label>
               )}
             </div>

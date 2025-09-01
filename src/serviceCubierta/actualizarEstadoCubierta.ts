@@ -3,7 +3,8 @@ export async function actualizarEstadoCubierta(
   nroSerie: string,
   estado: string,
   fechaRecapada?: string,
-  fechaDobleRecapada?: string
+  fechaDobleRecapada?: string,
+  motivoCambio?: string
 ): Promise<string> {
   try {
     let estadoStr = estado;
@@ -19,12 +20,14 @@ export async function actualizarEstadoCubierta(
       estadoStr = 'EnReparacion';
     }
     // El backend espera Estado, FechaRecapada, FechaDobleRecapada
-    const body: any = { Estado: estadoStr };
-    if (estadoStr === 'Recapada' && fechaRecapada) body.FechaRecapada = fechaRecapada;
-    if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
+  const body: any = { Estado: estadoStr };
+  if (estadoStr === 'Recapada' && fechaRecapada) body.FechaRecapada = fechaRecapada;
+  if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
+  if (estadoStr === 'EnReparacion' && motivoCambio) body.MotivoCambio = motivoCambio;
 
   
 
+   
     const response = await fetch(`http://localhost:5058/api/cubiertas/nroserie/${nroSerie}/estado`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

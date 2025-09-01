@@ -27,15 +27,24 @@ function FormularioMontaje() {
   // Verificar si la cubierta seleccionada está en reparación
   useEffect(() => {
     if (idCubierta) {
-      const cubierta = cubiertas.find(c => String(c.idCubierta) === String(idCubierta));
-      const estado = cubierta?.estadoInfo?.estado || cubierta?.EstadoInfo?.Estado || cubierta?.estado || cubierta?.Estado;
-      if (typeof estado === 'string' && estado.toLowerCase().replace(/\s/g, '') === 'enreparacion') {
-        setCubiertaEnReparacion(true);
+      // Buscar por nroSerie, que es lo que se ingresa en el input
+      const cubierta = cubiertas.find(c => String(c.nroSerie) === String(idCubierta));
+      if (cubierta) {
+        const estado = cubierta.estadoInfo?.estado || cubierta.EstadoInfo?.Estado || cubierta.estado || cubierta.Estado;
+        if (typeof estado === 'string' && estado.toLowerCase().replace(/\s/g, '') === 'enreparacion') {
+          setCubiertaEnReparacion(true);
+          setMensaje('La cubierta seleccionada está en reparación y no puede ser montada.');
+        } else {
+          setCubiertaEnReparacion(false);
+          setMensaje('');
+        }
       } else {
         setCubiertaEnReparacion(false);
+        setMensaje('');
       }
     } else {
       setCubiertaEnReparacion(false);
+      setMensaje('');
     }
   }, [idCubierta, cubiertas]);
 
@@ -61,18 +70,40 @@ function FormularioMontaje() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje('');
+    // Validación de IDs
+    if (!idCubierta || !idColectivo || !idUbicacion) {
+      setMensaje('Debes seleccionar cubierta, colectivo y ubicación válidos.');
+      return;
+    }
+    // Validar que la cubierta existe en la lista
+    const cubierta = cubiertas.find(c => String(c.nroSerie) === String(idCubierta));
+    if (!cubierta) {
+      setMensaje('La cubierta seleccionada no existe.');
+      return;
+    }
+    // Validar que el colectivo existe en la lista
+    const colectivo = colectivos.find(c => String(c.NroColectivo) === String(idColectivo));
+    if (!colectivo) {
+      setMensaje('El colectivo seleccionado no existe.');
+      return;
+    }
     // Si hay cubierta actual y no se confirmó el reemplazo, mostrar cartel y no guardar
+    if (cubiertaEnReparacion) {
+      setMensaje('La cubierta seleccionada está en reparación y no puede ser montada.');
+      return;
+    }
     if (cubiertaActual && mostrarCartel && !confirmarReemplazo) {
       setMensaje('Ya existe una cubierta en ese colectivo y ubicación. Confirma el reemplazo.');
       return;
     }
     // Enviar DTO al backend
     const dto = {
-      IdCubierta: Number(idCubierta),
-      IdColectivo: Number(idColectivo),
+      IdCubierta: cubierta.idCubierta ?? cubierta.IdCubierta,
+      IdColectivo: colectivo.IdColectivo,
       IdUbicacion: Number(idUbicacion),
       MotivoCambio: motivoCambio
     };
+    console.log('Montaje a crear:', dto);
     const res = await fetch('http://localhost:5058/api/montajes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -88,8 +119,8 @@ function FormularioMontaje() {
       setCubiertaActual(null);
       setMostrarCartel(false);
       setConfirmarReemplazo(false);
-            setIdColectivo('0');
-            setIdUbicacion('0');
+      setIdColectivo('0');
+      setIdUbicacion('0');
     }
   };
 
@@ -183,7 +214,10 @@ function FormularioMontaje() {
         </div>
   <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none" disabled={cubiertaEnReparacion}>Guardar Montaje</button>
       </form>
-      {mensaje && <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>}
+      {/* Solo mostrar el mensaje si no es el de reparación, para evitar duplicidad de cartel */}
+      {mensaje && !cubiertaEnReparacion && (
+        <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>
+      )}
     </div>
   );
 }
