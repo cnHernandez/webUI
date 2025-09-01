@@ -1,9 +1,14 @@
 export type EstadoCubierta = 'Nueva' | 'Recapada' | 'DobleRecapada' | 'EnReparacion' | 0 | 1 | 2 | 3 | string | number;
 export type EstadoCubiertaInfo = {
-  Estado: string;
+  Estado?: string;
+  estado?: string;
   FechaRecapada?: string;
+  fechaRecapada?: string;
   FechaDobleRecapada?: string;
+  fechaDobleRecapada?: string;
   MotivoCambio?: string;
+  motivoCambio?: string;
+  [key: string]: any;
 };
 
 export type Cubierta = {
@@ -16,9 +21,12 @@ export type Cubierta = {
   fechaRecapada?: string;
   fechaDobleRecapada?: string;
   fechaReparacion?: string;
+  FechaReparacion?: string;
   idColectivo?: number;
   idUbicacion?: number;
   ubicacionDescripcion?: string;
+  UbicacionDescripcion?: string;
+  [key: string]: any;
 };
 
 // Utilidad para traducir cualquier valor de estado a su descripción

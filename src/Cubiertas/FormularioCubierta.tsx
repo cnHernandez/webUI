@@ -107,7 +107,7 @@ export default function FormularioCubierta() {
     }
   };
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+  <div className="w-full min-h-screen bg-blue-100 flex flex-col items-center justify-center">
       
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
         <h2 className="text-xl font-bold mb-4 text-center">Ingreso / Cambio de Estado</h2>

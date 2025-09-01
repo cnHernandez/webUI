@@ -3,8 +3,6 @@ import FormularioMontaje from './Cubiertas/FormularioMontaje';
 import Menu from './Layout/Menu';
 import ListaStockCubiertas from './Cubiertas/ListaStockCubiertas';
 import { useState } from 'react';
-
-
 import HistorialCubiertaTab from './Cubiertas/HistorialCubiertaTab';
 
 function App() {

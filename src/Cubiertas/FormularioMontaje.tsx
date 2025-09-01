@@ -125,99 +125,101 @@ function FormularioMontaje() {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg">
-      <h2 className="text-xl font-bold mb-4 text-center">Montar/Rotar Cubierta</h2>
-      {cubiertaEnReparacion && (
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
-          <span>La cubierta seleccionada está en reparación y no puede ser montada.</span>
-        </div>
-      )}
-      {cubiertaActual && mostrarCartel && !confirmarReemplazo && (
-        <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
-          <div>
-            <span>Cubierta actual en este colectivo y ubicación:</span><br />
-            <span>Nro. Serie: <b>{cubiertaActual.nroSerieCubierta ?? cubiertaActual.NroSerieCubierta ?? cubiertaActual.NroSerie ?? ''}</b></span>
-            {cubiertaActual.estado && <> | <span>Estado: <b>{cubiertaActual.estado}</b></span></>}
+    <div className="w-full min-h-screen bg-blue-100 flex flex-col items-center justify-center">
+      <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg">
+        <h2 className="text-xl font-bold mb-4 text-center">Montar/Rotar Cubierta</h2>
+        {cubiertaEnReparacion && (
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
+            <span>La cubierta seleccionada está en reparación y no puede ser montada.</span>
           </div>
-          <button type="button" className="mt-2 bg-red-700 text-white py-2 px-4 rounded-md font-medium cursor-pointer border-none" onClick={() => setConfirmarReemplazo(true)}>
-            Confirmar reemplazo
-          </button>
-        </div>
-      )}
-      <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-        <div className="flex flex-row gap-8 justify-center">
-          {/* Columna 1 */}
-          <div className="flex flex-col gap-4 min-w-[220px]">
-            <label className="font-medium text-black block">Cubierta
-              <input
-                type="text"
-                value={idCubierta}
-                onChange={e => setIdCubierta(e.target.value)}
-                required
-                className="border border-gray-300 rounded-md p-2 w-full mt-1"
-                list="cubierta-list"
-                placeholder="Filtrar por nro cubierta..."
-              />
-              <datalist id="cubierta-list">
-                {cubiertas.map((c, i) => (
-                  <option key={c.idCubierta ?? i} value={c.nroSerie} />
-                ))}
-              </datalist>
-            </label>
-            <label className="font-medium text-black block">Colectivo
-              <input
-                type="text"
-                value={idColectivo}
-                onChange={e => setIdColectivo(e.target.value)}
-                required
-                className="border border-gray-300 rounded-md p-2 w-full mt-1"
-                list="colectivo-list"
-                placeholder="Filtrar por colectivo..."
-              />
-              <datalist id="colectivo-list">
-                {colectivos.map((c: any, i: number) => (
-                  <option key={c.IdColectivo ?? i} value={c.NroColectivo} />
-                ))}
-              </datalist>
-            </label>
+        )}
+        {cubiertaActual && mostrarCartel && !confirmarReemplazo && (
+          <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
+            <div>
+              <span>Cubierta actual en este colectivo y ubicación:</span><br />
+              <span>Nro. Serie: <b>{cubiertaActual.nroSerieCubierta ?? cubiertaActual.NroSerieCubierta ?? cubiertaActual.NroSerie ?? ''}</b></span>
+              {cubiertaActual.estado && <> | <span>Estado: <b>{cubiertaActual.estado}</b></span></>}
+            </div>
+            <button type="button" className="mt-2 bg-red-700 text-white py-2 px-4 rounded-md font-medium cursor-pointer border-none" onClick={() => setConfirmarReemplazo(true)}>
+              Confirmar reemplazo
+            </button>
           </div>
-          {/* Columna 2 */}
-          <div className="flex flex-col gap-4 min-w-[220px]">
-            <label className="font-medium text-black block">Ubicación
-              <select value={idUbicacion} onChange={e => setIdUbicacion(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1">
-                <option value="">Seleccionar Ubicación</option>
-                {ubicacionesCubierta.map(u => (
-                  <option key={u.IdUbicacion} value={u.IdUbicacion}>{u.Descripcion}</option>
-                ))}
-              </select>
-            </label>
-              {cubiertaActual && mostrarCartel && (
-                <label className="font-medium text-black block">Motivo de cambio:
-                  <input
-                      type="text"
-                      id="motivoCambio"
-                      value={motivoCambio}
-                      onChange={e => setMotivoCambio(e.target.value)}
-                      className="w-full border border-gray-300 rounded-md p-2 mt-1"
-                      list="motivo-cambio-list"
-                      placeholder="Seleccionar motivo..."
-                  />
-                  <datalist id="motivo-cambio-list">
-                    <option value="PINCHADO" />
-                    <option value="MAL DESGASTE" />
-                    <option value="DESGASTE" />
-                    <option value="RUPTURA" />
-                  </datalist>
-                </label>
-              )}
+        )}
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div className="flex flex-row gap-8 justify-center">
+            {/* Columna 1 */}
+            <div className="flex flex-col gap-4 min-w-[220px]">
+              <label className="font-medium text-black block">Cubierta
+                <input
+                  type="text"
+                  value={idCubierta}
+                  onChange={e => setIdCubierta(e.target.value)}
+                  required
+                  className="border border-gray-300 rounded-md p-2 w-full mt-1"
+                  list="cubierta-list"
+                  placeholder="Filtrar por nro cubierta..."
+                />
+                <datalist id="cubierta-list">
+                  {cubiertas.map((c, i) => (
+                    <option key={c.idCubierta ?? i} value={c.nroSerie} />
+                  ))}
+                </datalist>
+              </label>
+              <label className="font-medium text-black block">Colectivo
+                <input
+                  type="text"
+                  value={idColectivo}
+                  onChange={e => setIdColectivo(e.target.value)}
+                  required
+                  className="border border-gray-300 rounded-md p-2 w-full mt-1"
+                  list="colectivo-list"
+                  placeholder="Filtrar por colectivo..."
+                />
+                <datalist id="colectivo-list">
+                  {colectivos.map((c: any, i: number) => (
+                    <option key={c.IdColectivo ?? i} value={c.NroColectivo} />
+                  ))}
+                </datalist>
+              </label>
+            </div>
+            {/* Columna 2 */}
+            <div className="flex flex-col gap-4 min-w-[220px]">
+              <label className="font-medium text-black block">Ubicación
+                <select value={idUbicacion} onChange={e => setIdUbicacion(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1">
+                  <option value="">Seleccionar Ubicación</option>
+                  {ubicacionesCubierta.map(u => (
+                    <option key={u.IdUbicacion} value={u.IdUbicacion}>{u.Descripcion}</option>
+                  ))}
+                </select>
+              </label>
+                {cubiertaActual && mostrarCartel && (
+                  <label className="font-medium text-black block">Motivo de cambio:
+                    <input
+                        type="text"
+                        id="motivoCambio"
+                        value={motivoCambio}
+                        onChange={e => setMotivoCambio(e.target.value)}
+                        className="w-full border border-gray-300 rounded-md p-2 mt-1"
+                        list="motivo-cambio-list"
+                        placeholder="Seleccionar motivo..."
+                    />
+                    <datalist id="motivo-cambio-list">
+                      <option value="PINCHADO" />
+                      <option value="MAL DESGASTE" />
+                      <option value="DESGASTE" />
+                      <option value="RUPTURA" />
+                    </datalist>
+                  </label>
+                )}
+            </div>
           </div>
-        </div>
-  <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none" disabled={cubiertaEnReparacion}>Guardar Montaje</button>
-      </form>
-      {/* Solo mostrar el mensaje si no es el de reparación, para evitar duplicidad de cartel */}
-      {mensaje && !cubiertaEnReparacion && (
-        <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>
-      )}
+    <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none" disabled={cubiertaEnReparacion}>Guardar Montaje</button>
+        </form>
+        {/* Solo mostrar el mensaje si no es el de reparación, para evitar duplicidad de cartel */}
+        {mensaje && !cubiertaEnReparacion && (
+          <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>
+        )}
+      </div>
     </div>
   );
 }
