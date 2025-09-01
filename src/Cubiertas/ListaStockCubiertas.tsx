@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import HistorialMontajeCubierta from './HistorialMontajeCubierta';
+import PerfilCubierta from './PerfilCubierta';
 import { traducirEstadoCubierta } from '../models/Cubierta';
 // import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
 
@@ -8,6 +9,7 @@ const ListaStockCubiertas: React.FC = () => {
   const [filtroEstado, setFiltroEstado] = useState('');
   const [cubiertas, setCubiertas] = useState<any[]>([]);
   const [cubiertaHistorialId, setCubiertaHistorialId] = useState<number | null>(null);
+  const [cubiertaPerfilSerie, setCubiertaPerfilSerie] = useState<string | null>(null);
   const [colectivosCubierta, setColectivosCubierta] = useState<{ [idCubierta: number]: string }>({});
   // Filtros
   const [filtroLibres, setFiltroLibres] = useState(false);
@@ -90,6 +92,12 @@ const ListaStockCubiertas: React.FC = () => {
     return true;
   });
 
+
+  if (cubiertaPerfilSerie !== null) {
+    const handleVolver = () => setCubiertaPerfilSerie(null);
+    return <PerfilCubierta nroSerie={cubiertaPerfilSerie} onVolver={handleVolver} />;
+  }
+
   if (cubiertaHistorialId !== null) {
     const handleVolver = () => setCubiertaHistorialId(null);
     return <HistorialMontajeCubierta idCubierta={cubiertaHistorialId} onVolver={handleVolver} />;
@@ -98,7 +106,7 @@ const ListaStockCubiertas: React.FC = () => {
   return (
     <div className="w-full bg-blue-100 py-12">
       <div className="max-w-5xl mx-auto p-8 bg-white rounded-xl shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Stock de Cubiertas</h2>
+        <h2 className="text-xl font-bold mb-4 text-center">Stock de Cubiertas</h2>
         {/* Filtros */}
         <div className="flex flex-row justify-center gap-16 mb-6 items-center">
           {/* Filtro 1: Libres */}
@@ -176,7 +184,8 @@ const ListaStockCubiertas: React.FC = () => {
           </thead>
           <tbody>
             {cubiertasFiltradas.map((c, i) => (
-              <tr key={c.idCubierta ?? i} className="cursor-pointer hover:bg-blue-50" onClick={() => setCubiertaHistorialId(c.idCubierta)}>
+              <tr key={c.idCubierta ?? i} className="cursor-pointer hover:bg-blue-50"
+                onClick={() => setCubiertaPerfilSerie(c.nroSerie)}>
                 <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
                 <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
                 <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>

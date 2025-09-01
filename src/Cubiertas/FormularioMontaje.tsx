@@ -126,7 +126,7 @@ function FormularioMontaje() {
 
   return (
     <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Montar/Rotar Cubierta</h2>
+      <h2 className="text-xl font-bold mb-4 text-center">Montar/Rotar Cubierta</h2>
       {cubiertaEnReparacion && (
         <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
           <span>La cubierta seleccionada está en reparación y no puede ser montada.</span>

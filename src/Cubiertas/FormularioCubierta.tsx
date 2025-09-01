@@ -79,7 +79,7 @@ export default function FormularioCubierta() {
           fecha = fecha.split('T')[0];
         }
         setFechaCompra(fecha);
-        let estadoActual = cubierta.estado ?? 'Nueva';
+  let estadoActual = cubierta.estadoInfo?.Estado ?? 'Nueva';
         // Normalizar para el select
         if (typeof estadoActual === 'number') {
           estadoActual = ['Nueva', 'Recapada', 'DobleRecapada', 'En Reparación'][estadoActual] ?? 'Nueva';
@@ -108,7 +108,9 @@ export default function FormularioCubierta() {
   };
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
+        <h2 className="text-xl font-bold mb-4 text-center">Ingreso / Cambio de Estado</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex gap-8">
             {/* Columna 1 */}
