@@ -48,7 +48,11 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
   return (
     <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg">
       <h2 className="text-xl font-bold mb-4 text-black text-center">Perfil de cubierta: {cubierta.nroSerie}</h2>
-      {onVolver && <button onClick={onVolver} className="mb-4 px-4 py-2 bg-blue-600 text-white rounded-md">Volver</button>}
+      {onVolver && (
+        <div className="flex justify-center mb-4">
+          <button onClick={onVolver} className="px-4 py-2 bg-blue-600 text-white rounded-md">Volver</button>
+        </div>
+      )}
       <table className="w-full border-collapse text-black mb-6">
         <tbody>
           <tr>
