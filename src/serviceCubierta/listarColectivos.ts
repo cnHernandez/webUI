@@ -5,7 +5,6 @@ export async function listarColectivos(): Promise<Colectivo[]> {
     const response = await fetch('http://localhost:5058/api/colectivos');
     if (response.ok) {
       const data = await response.json();
-      console.log('Respuesta de la API /colectivos:', data);
       return data.map((c: any) => ({
         IdColectivo: c.idColectivo,
         NroColectivo: c.nroColectivo,

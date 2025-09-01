@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import HistorialMontajeCubierta from './HistorialMontajeCubierta';
+import { traducirEstadoCubierta } from '../models/Cubierta';
 // import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
 
 
@@ -67,7 +68,8 @@ const ListaStockCubiertas: React.FC = () => {
 
   // Filtrado de cubiertas
   const cubiertasFiltradas = cubiertas.filter((c) => {
-    // Filtro 1: Libres (sin ubicación y sin colectivo)
+ 
+  // Filtro 1: Libres (sin ubicación y sin colectivo)
     if (filtroLibres) {
       const sinUbicacion = !c.ubicacionDescripcion || c.ubicacionDescripcion.trim() === '';
       const sinColectivo = !colectivosCubierta[c.idCubierta] || colectivosCubierta[c.idCubierta] === '-';
@@ -137,7 +139,13 @@ const ListaStockCubiertas: React.FC = () => {
               onChange={e => setInputNroCubierta(e.target.value)}
               placeholder="Filtrar por nro cubierta..."
               className="border rounded px-2 py-1 w-full"
+              list="cubierta-list"
             />
+            <datalist id="cubierta-list">
+              {cubiertas.map((cubierta) => (
+                <option key={String(cubierta.idCubierta)} value={cubierta.nroSerie} />
+              ))}
+            </datalist>
           </div>
           {/* Filtro 4: Estado (solo select) */}
           <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
@@ -151,6 +159,7 @@ const ListaStockCubiertas: React.FC = () => {
               <option value="Nueva">Nueva</option>
               <option value="Recapada">Recapada</option>
               <option value="DobleRecapada">Doble Recapada</option>
+              <option value="EnReparacion">En Reparación</option>
             </select>
           </div>
         </div>
@@ -171,7 +180,7 @@ const ListaStockCubiertas: React.FC = () => {
                 <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
                 <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
                 <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>
-                <td className="border border-gray-300 p-2 text-center">{c.estadoInfo?.estado || '-'}</td>
+                <td className="border border-gray-300 p-2 text-center">{traducirEstadoCubierta(c.estadoInfo?.estado)}</td>
                 <td className="border border-gray-300 p-2 text-center">{colectivosCubierta[c.idCubierta] || '-'}</td>
                 <td className="border border-gray-300 p-2 text-center">{c.ubicacionDescripcion && c.ubicacionDescripcion.trim() !== '' ? c.ubicacionDescripcion : '-'}</td>
               </tr>

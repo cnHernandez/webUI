@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { crearCubierta } from '../serviceCubierta/crearCubierta';
 import { actualizarEstadoCubierta } from '../serviceCubierta/actualizarEstadoCubierta';
+import { obtenerCubiertaPorNroSerie } from '../serviceCubierta/obtenerCubiertaPorNroSerie';
 
 
 export default function FormularioCubierta() {
@@ -18,8 +19,12 @@ export default function FormularioCubierta() {
     e.preventDefault();
     setMensaje('');
     if (editando) {
-      // Actualizar estado en la base de datos
-      const result = await actualizarEstadoCubierta(nroSerie, estado, fechaRecapado, fechaDobleRecapada);
+      // Normalizar el estado para el backend
+      let estadoEnviar = estado;
+      if (estado === 'En Reparación') estadoEnviar = 'EnReparacion';
+      if (estado === 'en reparacion') estadoEnviar = 'EnReparacion';
+      if (estado === 'enReparacion') estadoEnviar = 'EnReparacion';
+      const result = await actualizarEstadoCubierta(nroSerie, estadoEnviar, fechaRecapado, fechaDobleRecapada);
       setMensaje(result);
       setNroSerie('');
       setMarca('');
@@ -56,24 +61,36 @@ export default function FormularioCubierta() {
   const handleNroSerieBlur = async () => {
     if (!nroSerie) return;
     try {
-      const res = await fetch(`http://localhost:5058/api/cubiertas/nroserie/${nroSerie}`);
-      if (res.ok) {
-        const cubierta = await res.json();
-        if (cubierta) {
-          setMarca(cubierta.Marca ?? cubierta.marca ?? '');
-          setMedida(cubierta.Medida ?? cubierta.medida ?? '');
-          // Formatear fecha a yyyy-MM-dd si viene con hora
-          let fecha = cubierta.FechaCompra ?? cubierta.fechaCompra ?? '';
-          if (fecha && fecha.includes('T')) {
-            fecha = fecha.split('T')[0];
-          }
-          setFechaCompra(fecha);
-          setEstado(cubierta.Estado ?? cubierta.estado ?? 'Nueva');
-          setEditando(true);
-          setMensaje('Cubierta existente, puedes editar el estado.');
-        } else {
-          setEditando(false);
+      const cubierta = await obtenerCubiertaPorNroSerie(nroSerie);
+      if (cubierta) {
+        setMarca(cubierta.marca ?? '');
+        setMedida(cubierta.medida ?? '');
+        // Formatear fecha a yyyy-MM-dd si viene con hora
+        let fecha = cubierta.fechaCompra ?? '';
+        if (fecha && fecha.includes('T')) {
+          fecha = fecha.split('T')[0];
         }
+        setFechaCompra(fecha);
+        let estadoActual = cubierta.estado ?? 'Nueva';
+        // Normalizar para el select
+        if (typeof estadoActual === 'number') {
+          estadoActual = ['Nueva', 'Recapada', 'DobleRecapada', 'En Reparación'][estadoActual] ?? 'Nueva';
+        }
+        if (estadoActual === 'EnReparacion' || estadoActual === 'enReparacion' || estadoActual === 'En Reparación') {
+          estadoActual = 'En Reparación';
+        }
+        if (estadoActual === 'DobleRecapada' || estadoActual === 'Doble Recapada') {
+          estadoActual = 'DobleRecapada';
+        }
+        if (estadoActual === 'Recapada' || estadoActual === 'recapada') {
+          estadoActual = 'Recapada';
+        }
+        if (estadoActual === 'Nueva' || estadoActual === 'nueva') {
+          estadoActual = 'Nueva';
+        }
+        setEstado(estadoActual);
+        setEditando(true);
+        setMensaje('Cubierta existente, puedes editar el estado.');
       } else {
         setEditando(false);
       }
@@ -81,23 +98,51 @@ export default function FormularioCubierta() {
       setEditando(false);
     }
   };
-
   return (
-    <div className="w-full bg-blue-100 py-12">
-      <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg">
-        <h2 className="text-xl font-bold mb-4">Ingresar Cubierta Nueva</h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-row gap-8 justify-center">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
+        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+          <div className="flex gap-8">
             {/* Columna 1 */}
             <div className="flex flex-col gap-4 min-w-[220px]">
               <label className="font-medium text-black block">Nro. Serie
-                <input type="text" value={nroSerie} onChange={e => setNroSerie(e.target.value)} onBlur={handleNroSerieBlur} required className="border border-gray-300 rounded-md p-2 w-full mt-1" />
+                <input
+                  type="text"
+                  value={nroSerie}
+                  onChange={e => setNroSerie(e.target.value)}
+                  onBlur={handleNroSerieBlur}
+                  className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black"
+                />
               </label>
               <label className="font-medium text-black block">Marca
-                <input type="text" value={marca} onChange={e => setMarca(e.target.value)} required className={`border border-gray-300 rounded-md p-2 w-full mt-1 ${editando ? 'text-black' : ''}`} disabled={editando} />
+                <input
+                  type="text"
+                  value={marca}
+                  onChange={e => setMarca(e.target.value)}
+                  disabled={editando}
+                  list="marca-list"
+                  placeholder="Seleccionar marca..."
+                  className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black"
+                />
+                <datalist id="marca-list">
+                  <option value="DAYTON" />
+                  <option value="BRIDGESTONE" />
+                  <option value="FATE" />
+                  <option value="FIRESTONE" />
+                  <option value="SAMSON" />
+                  <option value="GOODYEAR" />
+                  <option value="CONTINENTAL" />
+                  <option value="ESTELMAN" />
+                  <option value="MICHELIN" />
+                </datalist>
               </label>
               <label className="font-medium text-black block">Medida
-                <input type="text" value={medida} onChange={e => setMedida(e.target.value)} required className={`border border-gray-300 rounded-md p-2 w-full mt-1 ${editando ? 'text-black' : ''}`} disabled={editando} />
+                <input
+                  type="text"
+                  value="295/80 R22.5"
+                  readOnly
+                  className={`border border-gray-300 rounded-md p-2 w-full mt-1 text-black bg-gray-100`}
+                />
               </label>
             </div>
             {/* Columna 2 */}
@@ -110,6 +155,7 @@ export default function FormularioCubierta() {
                   <option value="Nueva">Nueva</option>
                   <option value="Recapada">Recapada</option>
                   <option value="DobleRecapada">Doble Recapada</option>
+                  <option value="EnReparacion">En Reparación</option>
                 </select>
               </label>
               {estado === 'Recapada' && (

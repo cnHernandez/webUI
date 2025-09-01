@@ -8,11 +8,22 @@ export async function actualizarEstadoCubierta(
   try {
     let estadoStr = estado;
     if (typeof estado === 'number') {
-      estadoStr = ['Nueva', 'Recapada', 'DobleRecapada'][estado] ?? 'Nueva';
+      estadoStr = ['Nueva', 'Recapada', 'DobleRecapada', 'EnReparacion'][estado] ?? 'Nueva';
     }
-    const body: any = { estado: estadoStr };
-    if (estadoStr === 'Recapada' && fechaRecapada) body.fechaRecapada = fechaRecapada;
-    if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.fechaDobleRecapada = fechaDobleRecapada;
+    // Normalizar variantes del estado EnReparacion
+    if (
+      estadoStr === 'En Reparación' ||
+      estadoStr === 'en reparacion' ||
+      estadoStr === 'enReparacion'
+    ) {
+      estadoStr = 'EnReparacion';
+    }
+    // El backend espera Estado, FechaRecapada, FechaDobleRecapada
+    const body: any = { Estado: estadoStr };
+    if (estadoStr === 'Recapada' && fechaRecapada) body.FechaRecapada = fechaRecapada;
+    if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
+
+  
 
     const response = await fetch(`http://localhost:5058/api/cubiertas/nroserie/${nroSerie}/estado`, {
       method: 'PUT',
