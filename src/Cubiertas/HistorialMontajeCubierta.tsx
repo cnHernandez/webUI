@@ -11,13 +11,13 @@ const HistorialMontajeCubierta: React.FC<Props> = ({ idCubierta, onVolver }) => 
   const [historial, setHistorial] = useState<HistorialMontaje[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  console.log('idCubierta recibido:', idCubierta);
+  
 
   useEffect(() => {
     setLoading(true);
     obtenerHistorialMontajeCubierta(idCubierta)
       .then(data => {
-        console.log('Historial recibido:', data);
+        
         setHistorial(data);
         setLoading(false);
       })
