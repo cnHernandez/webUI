@@ -33,8 +33,7 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
   if (error) return <div className="p-4 text-red-600">{error}</div>;
   if (!cubierta) return <div className="p-4 text-gray-500">No se encontró la cubierta.</div>;
 
-  // Log para depuración
-  console.log('Datos recibidos en PerfilCubierta:', cubierta);
+
 
   // Estado y fechas desde el modelo actualizado
   // El backend envía las propiedades de estadoInfo en minúscula

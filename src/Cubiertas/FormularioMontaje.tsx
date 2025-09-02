@@ -50,22 +50,32 @@ function FormularioMontaje() {
 
   // Consultar montaje actual cuando cambian colectivo y ubicación
   useEffect(() => {
-    if (idColectivo && idUbicacion) {
-      consultarMontajeActual(Number(idColectivo), Number(idUbicacion)).then((data: any) => {
+    // Buscar el id interno del colectivo seleccionado
+    const colectivoObj = colectivos.find(c => String(c.NroColectivo) === String(idColectivo));
+    const idColectivoInterno = colectivoObj?.IdColectivo;
+    // idUbicacion ya debería ser el id interno si el select lo maneja bien
+    const idUbicacionInterno = idUbicacion;
+    if (idColectivoInterno && idUbicacionInterno) {
+     
+      consultarMontajeActual(Number(idColectivoInterno), Number(idUbicacionInterno)).then((data: any) => {
+       
         setCubiertaActual(data);
-        if (data && typeof data === 'object' && data.idCubierta !== undefined) {
-          setMostrarCartel(String(data.idCubierta) !== idCubierta);
+        const nroSerieActual = data?.nroSerieCubierta ?? data?.NroSerieCubierta ?? data?.NroSerie ?? '';
+     
+        if (nroSerieActual && String(nroSerieActual) !== String(idCubierta)) {
+          setMostrarCartel(true);
         } else {
           setMostrarCartel(false);
         }
-        setConfirmarReemplazo(false);
+          // Solo resetear confirmarReemplazo si aún no está confirmado
+          setConfirmarReemplazo(prev => prev ? true : false);
       });
     } else {
       setCubiertaActual(null);
       setMostrarCartel(false);
       setConfirmarReemplazo(false);
     }
-  }, [idColectivo, idUbicacion, idCubierta]);
+  }, [idColectivo, idUbicacion, idCubierta, colectivos]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -103,7 +113,6 @@ function FormularioMontaje() {
       IdUbicacion: Number(idUbicacion),
       MotivoCambio: motivoCambio
     };
-    console.log('Montaje a crear:', dto);
     const res = await fetch('http://localhost:5058/api/montajes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -140,7 +149,13 @@ function FormularioMontaje() {
               <span>Nro. Serie: <b>{cubiertaActual.nroSerieCubierta ?? cubiertaActual.NroSerieCubierta ?? cubiertaActual.NroSerie ?? ''}</b></span>
               {cubiertaActual.estado && <> | <span>Estado: <b>{cubiertaActual.estado}</b></span></>}
             </div>
-            <button type="button" className="mt-2 bg-red-700 text-white py-2 px-4 rounded-md font-medium cursor-pointer border-none" onClick={() => setConfirmarReemplazo(true)}>
+            <button
+              type="button"
+              className="mt-2 bg-red-700 text-white py-2 px-4 rounded-md font-medium cursor-pointer border-none"
+              onClick={() => {
+                setConfirmarReemplazo(true);
+              }}
+            >
               Confirmar reemplazo
             </button>
           </div>
