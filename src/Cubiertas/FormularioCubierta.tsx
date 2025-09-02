@@ -109,7 +109,7 @@ export default function FormularioCubierta() {
   return (
   <div className="w-full min-h-screen bg-blue-100 flex flex-col items-center justify-center">
       
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl">
+      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl mb-30">
         <h2 className="text-xl font-bold mb-4 text-center">Ingreso / Cambio de Estado</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
           <div className="flex gap-8">

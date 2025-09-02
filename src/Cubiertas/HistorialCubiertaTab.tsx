@@ -40,7 +40,7 @@ export default function HistorialCubiertaTab() {
 
   return (
     <div className="w-full min-h-screen bg-blue-100 flex flex-col items-center justify-center">
-      <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg">
+      <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mb-30">
         <h2 className="text-xl font-bold mb-4 text-black text-center">Historial de Montajes por Cubierta</h2>
         <div className="flex flex-col gap-4 mb-6 items-center">
           <label className="font-medium text-black block">Nro. Serie: 

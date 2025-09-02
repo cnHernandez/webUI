@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import HistorialMontajeCubierta from './HistorialMontajeCubierta';
+import HistorialMontajeCubierta from './HistorialMontajeCubiertas';
 import PerfilCubierta from './PerfilCubierta';
 import { traducirEstadoCubierta } from '../models/Cubierta';
 // import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
