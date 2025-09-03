@@ -71,7 +71,7 @@ function App() {
     <div className="min-h-screen w-screen bg-white flex flex-col">
       <Menu nombreUsuario={nombreUsuario} rolUsuario={rol} onLogout={handleLogout} onConfiguracion={() => setShowConfiguracion(true)} />
       {showConfiguracion ? (
-        <ConfiguracionUsuarios />
+  <ConfiguracionUsuarios onVolver={() => setShowConfiguracion(false)} />
       ) : (
         <div className="w-screen bg-white rounded-none shadow-none p-0">
           <div className="flex gap-4 border-b border-gray-200 pt-4 pb-2 justify-center">

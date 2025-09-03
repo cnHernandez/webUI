@@ -9,7 +9,11 @@ interface Usuario {
   rol: RolUsuario;
 }
 
-export default function ConfiguracionUsuarios() {
+interface ConfiguracionUsuariosProps {
+  onVolver?: () => void;
+}
+
+export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuariosProps) {
   // Estado para modal de creación de usuario
   const [showCrearModal, setShowCrearModal] = useState(false);
   const [nuevoUsuario, setNuevoUsuario] = useState<{ nombreUsuario: string; contraseña: string; rol: RolUsuario | '' }>({ nombreUsuario: '', contraseña: '', rol: '' });
@@ -81,6 +85,7 @@ export default function ConfiguracionUsuarios() {
           Crear Usuario
         </button>
       </div>
+    
       {error && <div className="text-red-600 mb-2">{error}</div>}
       {/* Mensaje de éxito al modificar */}
       {mostrarMensaje && mensaje && (
@@ -113,6 +118,15 @@ export default function ConfiguracionUsuarios() {
           ))}
         </tbody>
       </table>
+      {/* Botón volver debajo del listado */}
+      <div className="flex justify-center mt-8">
+        <button
+          className="px-6 py-2 bg-gray-300 text-gray-800 rounded-md font-semibold shadow hover:bg-gray-400"
+          onClick={() => onVolver && onVolver()}
+        >
+          Volver
+        </button>
+      </div>
 
       {/* Modal de edición */}
       {/* Modal de creación de usuario */}
