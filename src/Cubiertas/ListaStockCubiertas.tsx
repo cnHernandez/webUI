@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import HistorialMontajeCubierta from './HistorialMontajeCubiertas';
 import PerfilCubierta from './PerfilCubierta';
 import { traducirEstadoCubierta } from '../models/Cubierta';
-// import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
+import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
+import { obtenerHistorialMontajeCubierta } from '../serviceCubierta/obtenerHistorialMontajeCubierta';
+import { listarColectivos } from '../serviceCubierta/listarColectivos';
 
 
 const ListaStockCubiertas: React.FC = () => {
@@ -20,38 +22,33 @@ const ListaStockCubiertas: React.FC = () => {
 
   // Obtener lista de colectivos desde la base de datos al montar
   useEffect(() => {
-    fetch('http://localhost:5058/api/colectivos')
-      .then(res => res.ok ? res.json() : [])
+    listarColectivos()
       .then(data => {
-        setColectivosBD(Array.isArray(data) ? data : []);
+        // Adaptar para el filtro: idColectivo y nroColectivo
+        setColectivosBD(data.map(c => ({
+          idColectivo: c.IdColectivo,
+          nroColectivo: c.NroColectivo
+        })));
       })
       .catch(() => setColectivosBD([]));
   }, []);
 
   useEffect(() => {
-    fetch('http://localhost:5058/api/cubiertas')
-      .then(res => res.ok ? res.json() : [])
+    // Usar el service listarCubiertas
+    listarCubiertas()
       .then(async (data) => {
         setCubiertas(data);
-        // Consultar colectivo actual para cada cubierta usando historial
+        // Consultar colectivo actual para cada cubierta usando el service
         const colectivos: { [idCubierta: number]: string } = {};
         await Promise.all(
           data.map(async (cubierta: any) => {
             try {
-              const res = await fetch(`http://localhost:5058/api/montajes/historialcubierta/${cubierta.idCubierta}`);
-              if (res.ok) {
-                const historial = await res.json();
-                // El primer elemento es el más reciente
-                if (Array.isArray(historial) && historial.length > 0) {
-                  const actual = historial[0];
-                  // Si no tiene fecha de desinstalación, está montada
-                  colectivos[cubierta.idCubierta] = actual.fechaDesinstalacion == null ? (actual.nroColectivo || '-') : '-';
-                } else {
-                  colectivos[cubierta.idCubierta] = '-';
-                }
-              } else if (res.status === 404) {
-                // No hay historial, no mostrar error
-                colectivos[cubierta.idCubierta] = '-';
+              const historial = await obtenerHistorialMontajeCubierta(cubierta.idCubierta);
+              // El primer elemento es el más reciente
+              if (Array.isArray(historial) && historial.length > 0) {
+                const actual = historial[0];
+                // Si no tiene fecha de desinstalación, está montada
+                colectivos[cubierta.idCubierta] = actual.fechaDesinstalacion == null ? (actual.nroColectivo || '-') : '-';
               } else {
                 colectivos[cubierta.idCubierta] = '-';
               }

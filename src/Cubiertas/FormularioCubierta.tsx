@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { obtenerHistorialMontajeCubierta } from '../serviceCubierta/obtenerHistorialMontajeCubierta';
 import { crearCubierta } from '../serviceCubierta/crearCubierta';
 import { actualizarEstadoCubierta } from '../serviceCubierta/actualizarEstadoCubierta';
 import { obtenerCubiertaPorNroSerie } from '../serviceCubierta/obtenerCubiertaPorNroSerie';
@@ -14,11 +15,15 @@ export default function FormularioCubierta() {
   const [fechaDobleRecapada, setFechaDobleRecapada] = useState('');
   const [motivoCambio, setMotivoCambio] = useState('');
   const [mensaje, setMensaje] = useState('');
+  // Controla visibilidad del mensaje
+  const [mostrarMensaje, setMostrarMensaje] = useState(false);
   const [editando, setEditando] = useState(false);
+  const [montajeActual, setMontajeActual] = useState<{ nroColectivo: string; descripcionUbicacion: string } | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMensaje('');
+  setMensaje('');
+  setMostrarMensaje(false);
     if (editando) {
       // Normalizar el estado para el backend
       let estadoEnviar = estado;
@@ -32,7 +37,13 @@ export default function FormularioCubierta() {
         fechaDobleRecapada,
         estadoEnviar === 'EnReparacion' ? motivoCambio : undefined
       );
-      setMensaje(result);
+      if (result === 'Estado actualizado correctamente') {
+        setMensaje('✅ Estado actualizado correctamente');
+      } else {
+        setMensaje(result);
+      }
+      setMostrarMensaje(true);
+      setTimeout(() => setMostrarMensaje(false), 3000);
       setNroSerie('');
       setMarca('');
       setMedida('');
@@ -42,6 +53,7 @@ export default function FormularioCubierta() {
       setFechaDobleRecapada('');
       setMotivoCambio('');
       setEditando(false);
+      setMontajeActual(null);
       return;
     }
     const result = await crearCubierta({
@@ -54,6 +66,8 @@ export default function FormularioCubierta() {
       FechaDobleRecapada: estado === 'DobleRecapada' ? fechaDobleRecapada : undefined,
     });
     setMensaje(result);
+    setMostrarMensaje(true);
+    setTimeout(() => setMostrarMensaje(false), 3000);
     if (result === 'Cubierta guardada correctamente') {
       setNroSerie('');
       setMarca('');
@@ -68,6 +82,7 @@ export default function FormularioCubierta() {
   // Autocompletar datos si el nroSerie existe
   const handleNroSerieBlur = async () => {
     if (!nroSerie) return;
+    setMontajeActual(null);
     try {
       const cubierta = await obtenerCubiertaPorNroSerie(nroSerie);
       if (cubierta) {
@@ -79,7 +94,7 @@ export default function FormularioCubierta() {
           fecha = fecha.split('T')[0];
         }
         setFechaCompra(fecha);
-  let estadoActual = cubierta.estadoInfo?.Estado ?? 'Nueva';
+        let estadoActual = cubierta.estadoInfo?.Estado ?? 'Nueva';
         // Normalizar para el select
         if (typeof estadoActual === 'number') {
           estadoActual = ['Nueva', 'Recapada', 'DobleRecapada', 'En Reparación'][estadoActual] ?? 'Nueva';
@@ -98,17 +113,33 @@ export default function FormularioCubierta() {
         }
         setEstado(estadoActual);
         setEditando(true);
+        // Consultar si está montada actualmente
+        if (cubierta.idCubierta) {
+          const historial = await obtenerHistorialMontajeCubierta(cubierta.idCubierta);
+          // Buscar el montaje actual (sin fechaDesinstalacion)
+          const actual = historial.find(h => !h.fechaDesinstalacion);
+          if (actual) {
+            setMontajeActual({ nroColectivo: actual.nroColectivo, descripcionUbicacion: actual.descripcionUbicacion });
+          } else {
+            setMontajeActual(null);
+          }
+        } else {
+          setMontajeActual(null);
+        }
         setMensaje('Cubierta existente, puedes editar el estado.');
+        setMostrarMensaje(true);
+        setTimeout(() => setMostrarMensaje(false), 4000);
       } else {
         setEditando(false);
+        setMontajeActual(null);
       }
     } catch {
       setEditando(false);
+      setMontajeActual(null);
     }
   };
   return (
   <div className="w-full min-h-screen bg-blue-100 flex flex-col items-center justify-center">
-      
       <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-3xl mb-30">
         <h2 className="text-xl font-bold mb-4 text-center">Ingreso / Cambio de Estado</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-6">
@@ -193,7 +224,20 @@ export default function FormularioCubierta() {
           </div>
           <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none">{editando ? 'Actualizar Estado' : 'Guardar Cubierta'}</button>
         </form>
-        {mensaje && <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>}
+        {/* Cartel de éxito estilizado y mensajes temporales */}
+        {mostrarMensaje && (mensaje === 'Cubierta guardada correctamente' || mensaje === '✅ Estado actualizado correctamente') && (
+          <div className="mt-6 p-4 bg-green-100 border border-green-400 rounded-lg text-green-800 text-center font-semibold shadow">
+            <span>{mensaje}</span>
+          </div>
+        )}
+        {mostrarMensaje && mensaje && mensaje !== 'Cubierta guardada correctamente' && mensaje !== '✅ Estado actualizado correctamente' && (
+          <p className={`mt-4 text-base text-red-600`}>{mensaje}</p>
+        )}
+        {montajeActual && (
+          <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800 text-center font-semibold shadow">
+            <span>Actualmente montada en colectivo <b>{montajeActual.nroColectivo}</b>, ubicación <b>{montajeActual.descripcionUbicacion}</b></span>
+          </div>
+        )}
       </div>
     </div>
   );

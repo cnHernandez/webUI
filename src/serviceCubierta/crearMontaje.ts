@@ -13,6 +13,8 @@ export async function crearMontaje(data: {
         FechaInstalacion: new Date().toISOString()
       })
     });
+    
+   
     if (response.ok) return 'Montaje guardado correctamente';
     return 'Error al guardar el montaje';
   } catch {
