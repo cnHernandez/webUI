@@ -5,6 +5,8 @@ import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
 import { consultarMontajeActual } from '../serviceCubierta/consultarMontajeActual';
 
 function FormularioMontaje() {
+  // Estado para mostrar info de montaje si la cubierta está montada
+  const [cubiertaMontadaInfo, setCubiertaMontadaInfo] = useState<{ nroColectivo: string, descripcionUbicacion: string } | null>(null);
   const [cubiertaActual, setCubiertaActual] = useState<any|null>(null);
   const [cubiertaEnReparacion, setCubiertaEnReparacion] = useState(false);
   const [mostrarCartel, setMostrarCartel] = useState(false);
@@ -27,22 +29,35 @@ function FormularioMontaje() {
   // Verificar si la cubierta seleccionada está en reparación
   useEffect(() => {
     if (idCubierta) {
-      // Buscar por nroSerie, que es lo que se ingresa en el input
       const cubierta = cubiertas.find(c => String(c.nroSerie) === String(idCubierta));
       if (cubierta) {
+        // Verificar si la cubierta está montada en algún colectivo y ubicación
+        if ((cubierta.idColectivo && cubierta.idColectivo !== 0) && (cubierta.idUbicacion && cubierta.idUbicacion !== 0)) {
+          // Buscar nroColectivo y descripcionUbicacion
+          const colectivoObj = colectivos.find(c => c.IdColectivo === cubierta.idColectivo);
+          const nroColectivo = colectivoObj ? colectivoObj.NroColectivo : cubierta.idColectivo;
+          const ubicacionObj = ubicacionesCubierta.find(u => u.IdUbicacion === cubierta.idUbicacion);
+          const descripcionUbicacion = ubicacionObj ? ubicacionObj.Descripcion : cubierta.idUbicacion;
+          setCubiertaMontadaInfo({ nroColectivo: String(nroColectivo), descripcionUbicacion: String(descripcionUbicacion) });
+          setMensaje('');
+        } else {
+          setCubiertaMontadaInfo(null);
+          setMensaje('');
+        }
         const estado = cubierta.estadoInfo?.estado || cubierta.EstadoInfo?.Estado || cubierta.estado || cubierta.Estado;
         if (typeof estado === 'string' && estado.toLowerCase().replace(/\s/g, '') === 'enreparacion') {
           setCubiertaEnReparacion(true);
           setMensaje('La cubierta seleccionada está en reparación y no puede ser montada.');
         } else {
           setCubiertaEnReparacion(false);
-          setMensaje('');
         }
       } else {
+        setCubiertaMontadaInfo(null);
         setCubiertaEnReparacion(false);
         setMensaje('');
       }
     } else {
+      setCubiertaMontadaInfo(null);
       setCubiertaEnReparacion(false);
       setMensaje('');
     }
@@ -51,8 +66,11 @@ function FormularioMontaje() {
   // Consultar montaje actual cuando cambian colectivo y ubicación
   useEffect(() => {
     if (idColectivo && idUbicacion) {
-      consultarMontajeActual(Number(idColectivo), Number(idUbicacion)).then((data: any) => {
-        setCubiertaActual(data);
+      // Buscar el colectivo por NroColectivo y obtener su IdColectivo
+      const colectivoObj = colectivos.find(c => String(c.NroColectivo) === String(idColectivo));
+      const idColectivoReal = colectivoObj ? colectivoObj.IdColectivo : idColectivo;
+      consultarMontajeActual(Number(idColectivoReal), Number(idUbicacion)).then((data: any) => {
+  setCubiertaActual(data);
         if (data && typeof data === 'object' && data.idCubierta !== undefined) {
           setMostrarCartel(String(data.idCubierta) !== idCubierta);
         } else {
@@ -127,6 +145,13 @@ function FormularioMontaje() {
   return (
     <div className="w-full min-h-screen bg-blue-100 flex flex-col items-center justify-center">
       <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg mb-40">
+        {cubiertaMontadaInfo && (
+          <div className="bg-yellow-100 text-yellow-800 p-4 rounded-lg mb-4 text-center font-medium border border-yellow-300 shadow">
+            <span>
+              <b>¡Atención!</b> Esta cubierta ya está montada en el colectivo <b>{cubiertaMontadaInfo.nroColectivo}</b> en la ubicación <b>{cubiertaMontadaInfo.descripcionUbicacion}</b>.
+            </span>
+          </div>
+        )}
         <h2 className="text-xl font-bold mb-4 text-center">Montar/Rotar Cubierta</h2>
         {cubiertaEnReparacion && (
           <div className="bg-red-100 text-red-700 p-4 rounded-lg mb-4 text-center font-medium">
