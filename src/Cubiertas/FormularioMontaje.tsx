@@ -19,6 +19,8 @@ function FormularioMontaje() {
   const [colectivos, setColectivos] = useState<any[]>([]);
   const [cubiertas, setCubiertas] = useState<any[]>([]);
   const [mensaje, setMensaje] = useState('');
+  // Controla visibilidad del mensaje de éxito
+  const [mostrarMensaje, setMostrarMensaje] = useState(false);
 
   useEffect(() => {
     listarColectivos().then((data) => setColectivos(data));
@@ -87,8 +89,9 @@ function FormularioMontaje() {
   }, [idColectivo, idUbicacion, idCubierta]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMensaje('');
+  e.preventDefault();
+  setMensaje('');
+  setMostrarMensaje(false);
     // Validación de IDs
     if (!idCubierta || !idColectivo || !idUbicacion) {
       setMensaje('Debes seleccionar cubierta, colectivo y ubicación válidos.');
@@ -124,18 +127,23 @@ function FormularioMontaje() {
     };
     
   // Usar el service crearMontaje
-  const result = await crearMontaje(dto);
+    const result = await crearMontaje(dto);
     setMensaje(result);
     if (result === 'Montaje guardado correctamente') {
-      setIdCubierta('');
-      setIdColectivo('');
-      setIdUbicacion('');
-      setMotivoCambio('');
-      setCubiertaActual(null);
-      setMostrarCartel(false);
-      setConfirmarReemplazo(false);
-      setIdColectivo('0');
-      setIdUbicacion('0');
+      setMostrarMensaje(true);
+      // El setTimeout solo limpia el mensaje, no los campos
+      setTimeout(() => {
+        setMostrarMensaje(false);
+        setIdCubierta('');
+        setIdColectivo('');
+        setIdUbicacion('');
+        setMotivoCambio('');
+        setCubiertaActual(null);
+        setMostrarCartel(false);
+        setConfirmarReemplazo(false);
+        setIdColectivo('0');
+        setIdUbicacion('0');
+      }, 3000);
     }
   };
 
@@ -237,9 +245,15 @@ function FormularioMontaje() {
           </div>
     <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none" disabled={cubiertaEnReparacion}>Guardar Montaje</button>
         </form>
-        {/* Solo mostrar el mensaje si no es el de reparación, para evitar duplicidad de cartel */}
-        {mensaje && !cubiertaEnReparacion && (
-          <p className={`mt-4 text-base ${mensaje.includes('correctamente') ? 'text-green-600' : 'text-red-600'}`}>{mensaje}</p>
+        {/* Cartel de éxito estilizado y mensajes temporales */}
+        {mostrarMensaje && mensaje === 'Montaje guardado correctamente' && (
+          <div className="mt-6 p-4 bg-green-100 border border-green-400 rounded-lg text-green-800 text-center font-semibold shadow">
+            <span>✅ {mensaje.replace(/^✅\s*/, '')}</span>
+          </div>
+        )}
+        {/* Otros mensajes de error o advertencia */}
+        {mensaje && !cubiertaEnReparacion && mensaje !== 'Montaje guardado correctamente' && (
+          <p className={`mt-4 text-base text-red-600`}>{mensaje}</p>
         )}
       </div>
     </div>
