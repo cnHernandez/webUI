@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { crearMontaje } from '../serviceCubierta/crearMontaje';
 import { ubicacionesCubierta } from '../serviceCubierta/listarUbicaciones';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
@@ -24,7 +25,7 @@ function FormularioMontaje() {
     listarCubiertas().then((data) => {
       setCubiertas(data);
     });
-  }, [idCubierta, cubiertas]);
+  }, []); // Solo al montar
 
   // Verificar si la cubierta seleccionada está en reparación
   useEffect(() => {
@@ -121,13 +122,9 @@ function FormularioMontaje() {
       IdUbicacion: Number(idUbicacion),
       MotivoCambio: motivoCambio
     };
-    console.log('Montaje a crear:', dto);
-    const res = await fetch('http://localhost:5058/api/montajes', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(dto)
-    });
-    const result = await res.text();
+    
+  // Usar el service crearMontaje
+  const result = await crearMontaje(dto);
     setMensaje(result);
     if (result === 'Montaje guardado correctamente') {
       setIdCubierta('');
