@@ -6,6 +6,7 @@ import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
 import { consultarMontajeActual } from '../serviceCubierta/consultarMontajeActual';
 
 function FormularioMontaje() {
+  // ...existing code...
   // Estado para mostrar info de montaje si la cubierta está montada
   const [cubiertaMontadaInfo, setCubiertaMontadaInfo] = useState<{ nroColectivo: string, descripcionUbicacion: string } | null>(null);
   const [cubiertaActual, setCubiertaActual] = useState<any|null>(null);
@@ -19,6 +20,15 @@ function FormularioMontaje() {
   const [colectivos, setColectivos] = useState<any[]>([]);
   const [cubiertas, setCubiertas] = useState<any[]>([]);
   const [mensaje, setMensaje] = useState('');
+  // Determinar si la cubierta seleccionada está montada en otro colectivo/ubicación (debe ir después de declarar los estados)
+  let cubiertaSeleccionada: any = null;
+  let cubiertaMontadaEnOtroLugar = false;
+  if (cubiertas && idCubierta) {
+    cubiertaSeleccionada = cubiertas.find(c => String(c.nroSerie) === String(idCubierta));
+    if (cubiertaSeleccionada && cubiertaSeleccionada.idColectivo && cubiertaSeleccionada.idUbicacion) {
+      cubiertaMontadaEnOtroLugar = (String(cubiertaSeleccionada.idColectivo) !== String(idColectivo) || String(cubiertaSeleccionada.idUbicacion) !== String(idUbicacion));
+    }
+  }
   // Controla visibilidad del mensaje de éxito
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
 
@@ -94,6 +104,12 @@ function FormularioMontaje() {
   e.preventDefault();
   setMensaje('');
   setMostrarMensaje(false);
+  // Si se está reemplazando una cubierta, el motivo es obligatorio
+  if ((cubiertaActual && mostrarCartel && confirmarReemplazo && !motivoCambio.trim()) ||
+      (cubiertaMontadaEnOtroLugar && !motivoCambio.trim())) {
+    setMensaje('Debes ingresar el motivo de cambio para reemplazar o mover la cubierta.');
+    return;
+  }
     // Validación de IDs
     if (!idCubierta || !idColectivo || !idUbicacion) {
       setMensaje('Debes seleccionar cubierta, colectivo y ubicación válidos.');
@@ -224,25 +240,28 @@ function FormularioMontaje() {
                   ))}
                 </select>
               </label>
-                {cubiertaActual && mostrarCartel && (
+                {(cubiertaActual && mostrarCartel) || cubiertaMontadaEnOtroLugar ? (
                   <label className="font-medium text-black block">Motivo de cambio:
-                    <input
-                        type="text"
-                        id="motivoCambio"
-                        value={motivoCambio}
-                        onChange={e => setMotivoCambio(e.target.value)}
-                        className="w-full border border-gray-300 rounded-md p-2 mt-1"
-                        list="motivo-cambio-list"
-                        placeholder="Seleccionar motivo..."
-                    />
+          <input
+            type="text"
+            id="motivoCambio"
+            value={motivoCambio}
+            onChange={e => setMotivoCambio(e.target.value)}
+            className="w-full border border-gray-300 rounded-md p-2 mt-1"
+            list="motivo-cambio-list"
+            placeholder="Seleccionar motivo..."
+            autoComplete="off"
+          />
                     <datalist id="motivo-cambio-list">
                       <option value="PINCHADO" />
                       <option value="MAL DESGASTE" />
                       <option value="DESGASTE" />
                       <option value="RUPTURA" />
+                      <option value="REPARACIÓN" />
+                      <option value="ROTACION" />
                     </datalist>
                   </label>
-                )}
+                ) : null}
             </div>
           </div>
     <button type="submit" className="bg-blue-600 text-white py-2 px-6 rounded-md mt-6 self-center w-40 font-medium text-base cursor-pointer border-none" disabled={cubiertaEnReparacion}>Guardar Montaje</button>
