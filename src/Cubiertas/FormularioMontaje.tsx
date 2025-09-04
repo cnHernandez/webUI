@@ -73,10 +73,12 @@ function FormularioMontaje() {
       const colectivoObj = colectivos.find(c => String(c.NroColectivo) === String(idColectivo));
       const idColectivoReal = colectivoObj ? colectivoObj.IdColectivo : idColectivo;
       consultarMontajeActual(Number(idColectivoReal), Number(idUbicacion)).then((data: any) => {
-  setCubiertaActual(data);
-        if (data && typeof data === 'object' && data.idCubierta !== undefined) {
+        // Si la cubierta actual está desinstalada, no mostrar cartel
+        if (data && typeof data === 'object' && data.idCubierta !== undefined && !data.fechaDesinstalacion) {
+          setCubiertaActual(data);
           setMostrarCartel(String(data.idCubierta) !== idCubierta);
         } else {
+          setCubiertaActual(null);
           setMostrarCartel(false);
         }
         setConfirmarReemplazo(false);
@@ -141,7 +143,7 @@ function FormularioMontaje() {
         setCubiertaActual(null);
         setMostrarCartel(false);
         setConfirmarReemplazo(false);
-        setIdColectivo('0');
+        setIdColectivo('');
         setIdUbicacion('0');
       }, 3000);
     }

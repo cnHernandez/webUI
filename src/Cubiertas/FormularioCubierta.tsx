@@ -71,7 +71,7 @@ export default function FormularioCubierta() {
     if (result === 'Cubierta guardada correctamente') {
       setNroSerie('');
       setMarca('');
-      setMedida('');
+      setMedida('295/80 R22.5');
       setFechaCompra('');
       setEstado('Nueva');
       setFechaRecapado('');

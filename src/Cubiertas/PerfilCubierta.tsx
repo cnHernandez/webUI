@@ -119,19 +119,14 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
                   onClick={async () => {
                     if (!cubierta?.idCubierta) {
-                      alert('No se puede dar de baja: idCubierta no disponible');
+                      setShowConfirm(false);
                       return;
                     }
                     setBajaLoading(true);
                     const ok = await eliminarCubierta(cubierta.idCubierta);
                     setBajaLoading(false);
                     setShowConfirm(false);
-                    if (ok) {
-                      alert('Cubierta eliminada correctamente.');
-                      if (onVolver) onVolver();
-                    } else {
-                      alert('Error al eliminar la cubierta.');
-                    }
+                    if (ok && onVolver) onVolver();
                   }}
                   disabled={bajaLoading}
                 >

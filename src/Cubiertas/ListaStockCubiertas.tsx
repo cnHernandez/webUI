@@ -91,7 +91,32 @@ const ListaStockCubiertas: React.FC = () => {
 
 
   if (cubiertaPerfilSerie !== null) {
-    const handleVolver = () => setCubiertaPerfilSerie(null);
+    const handleVolver = () => {
+      setCubiertaPerfilSerie(null);
+      // Recargar cubiertas al volver del perfil
+      listarCubiertas()
+        .then(async (data) => {
+          setCubiertas(data);
+          const colectivos: { [idCubierta: number]: string } = {};
+          await Promise.all(
+            data.map(async (cubierta: any) => {
+              try {
+                const historial = await obtenerHistorialMontajeCubierta(cubierta.idCubierta);
+                if (Array.isArray(historial) && historial.length > 0) {
+                  const actual = historial[0];
+                  colectivos[cubierta.idCubierta] = actual.fechaDesinstalacion == null ? (actual.nroColectivo || '-') : '-';
+                } else {
+                  colectivos[cubierta.idCubierta] = '-';
+                }
+              } catch (err) {
+                colectivos[cubierta.idCubierta] = '-';
+              }
+            })
+          );
+          setColectivosCubierta(colectivos);
+        })
+        .catch(() => setCubiertas([]));
+    };
     return <PerfilCubierta nroSerie={cubiertaPerfilSerie} onVolver={handleVolver} />;
   }
 
