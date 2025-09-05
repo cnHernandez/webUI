@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import logo from '../assets/logo.png';
 
+import { RolUsuario } from '../models/Usuario';
+
 interface MenuProps {
   nombreUsuario?: string | null;
   onLogout?: () => void;
@@ -53,12 +55,14 @@ export default function Menu({ nombreUsuario, onLogout, rolUsuario, onConfigurac
         </button>
         {showMenu && (
           <div className="absolute right-0 top-10 bg-white border rounded shadow-lg py-1 w-32 z-50">
-            <button
-              className="w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-blue-100"
-              onClick={() => { setShowMenu(false); if (onConfiguracion) onConfiguracion(); }}
-            >
-              Configuración
-            </button>
+            {rolUsuario === RolUsuario.Administrador && (
+              <button
+                className="w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-blue-100"
+                onClick={() => { setShowMenu(false); if (onConfiguracion) onConfiguracion(); }}
+              >
+                Configuración
+              </button>
+            )}
             <button
               className="w-full text-left px-2 py-1 text-sm text-gray-700 hover:bg-blue-100"
               onClick={handleLogout}

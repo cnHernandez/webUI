@@ -13,7 +13,7 @@ export function getOpcionesPorRol(rol: RolUsuario): string[] {
     ];
   }
   if (rol === "Gomeria") {
-    return ["Ingreso", "Rotación"];
+    return ["Ingreso", "Rotación", "Stock"];
   }
   return [];
 }
