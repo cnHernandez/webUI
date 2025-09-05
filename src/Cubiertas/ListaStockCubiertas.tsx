@@ -205,17 +205,36 @@ const ListaStockCubiertas: React.FC = () => {
             </tr>
           </thead>
           <tbody>
-            {cubiertasFiltradas.map((c, i) => (
-              <tr key={c.idCubierta ?? i} className="cursor-pointer hover:bg-blue-50"
-                onClick={() => setCubiertaPerfilSerie(c.nroSerie)}>
-                <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
-                <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
-                <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>
-                <td className="border border-gray-300 p-2 text-center">{traducirEstadoCubierta(c.estadoInfo?.estado)}</td>
-                <td className="border border-gray-300 p-2 text-center">{colectivosCubierta[c.idCubierta] || '-'}</td>
-                <td className="border border-gray-300 p-2 text-center">{c.ubicacionDescripcion && c.ubicacionDescripcion.trim() !== '' ? c.ubicacionDescripcion : '-'}</td>
-              </tr>
-            ))}
+            {cubiertasFiltradas.map((c, i) => {
+              // Determinar color de fila
+              const estado = c.estadoInfo?.estado;
+              const colectivo = colectivosCubierta[c.idCubierta] || '-';
+              const ubicacion = c.ubicacionDescripcion && c.ubicacionDescripcion.trim() !== '';
+              let rowClass = '';
+              // Rojo: en reparación
+              if (
+                estado === 'EnReparacion' || estado === 'En Reparación' || estado === 'enReparacion' || estado === 'en reparacion'
+              ) {
+                rowClass = 'bg-red-500';
+              } else if ((colectivo === '-' || colectivo === '' || colectivo == null) && !ubicacion) {
+                // Verde: libre
+                rowClass = 'bg-green-500';
+              } else if (colectivo !== '-' && colectivo !== '' && colectivo != null && ubicacion) {
+                // Azul: montada
+                rowClass = 'bg-blue-500';
+              }
+              return (
+                <tr key={c.idCubierta ?? i} className={`cursor-pointer ${rowClass}`}
+                  onClick={() => setCubiertaPerfilSerie(c.nroSerie)}>
+                  <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
+                  <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
+                  <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>
+                  <td className="border border-gray-300 p-2 text-center">{traducirEstadoCubierta(c.estadoInfo?.estado)}</td>
+                  <td className="border border-gray-300 p-2 text-center">{colectivo}</td>
+                  <td className="border border-gray-300 p-2 text-center">{ubicacion ? c.ubicacionDescripcion : '-'}</td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
