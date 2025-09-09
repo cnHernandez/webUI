@@ -274,7 +274,9 @@ function FormularioMontaje() {
         )}
         {/* Otros mensajes de error o advertencia */}
         {mensaje && !cubiertaEnReparacion && mensaje !== 'Montaje guardado correctamente' && (
-          <p className={`mt-4 text-base text-red-600`}>{mensaje}</p>
+          <div className="mt-6 p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800 text-center font-semibold shadow">
+            <span>{mensaje}</span>
+          </div>
         )}
       </div>
     </div>

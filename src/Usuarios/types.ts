@@ -1,4 +1,4 @@
 export interface UsuarioDto {
   nombreUsuario: string;
-  contraseña: string;
+  contrasena: string;
 }

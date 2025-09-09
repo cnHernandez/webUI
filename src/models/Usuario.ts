@@ -8,6 +8,6 @@ export type RolUsuario = typeof RolUsuario[keyof typeof RolUsuario];
 export interface Usuario {
   id: number;
   nombreUsuario: string;
-  contraseñaHash: string;
+  contrasena: string;
   rol: RolUsuario;
 }

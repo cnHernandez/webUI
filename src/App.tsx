@@ -27,13 +27,21 @@ function App() {
   };
 
   useEffect(() => {
-    // Limpiar cualquier sesión previa al arrancar la app
-    localStorage.removeItem('nombreUsuario');
-    localStorage.removeItem('rolUsuario');
-    setLogueado(false);
-    setNombreUsuario(null);
-    setRol(null);
-    setTab('ingreso');
+    // Al iniciar, recuperar sesión si existe
+    const nombre = localStorage.getItem('nombreUsuario');
+    const rolLocal = localStorage.getItem('rolUsuario') as import('./models/Usuario').RolUsuario | null;
+    if (nombre && rolLocal) {
+      setLogueado(true);
+      setNombreUsuario(nombre);
+      setRol(rolLocal);
+      const opciones = rolLocal ? getOpcionesPorRol(rolLocal) : [];
+      setTab(opciones.length ? tabMap[opciones[0]] : 'ingreso');
+    } else {
+      setLogueado(false);
+      setNombreUsuario(null);
+      setRol(null);
+      setTab('ingreso');
+    }
   }, []);
 
   const handleLogout = () => {

@@ -22,8 +22,35 @@ export default function FormularioCubierta() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  setMensaje('');
-  setMostrarMensaje(false);
+    setMensaje('');
+    setMostrarMensaje(false);
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0);
+    // Validar fechas
+    if (fechaCompra) {
+      const fecha = new Date(fechaCompra);
+      if (fecha > hoy) {
+        setMensaje('La fecha de compra no puede ser mayor a la fecha actual.');
+        setMostrarMensaje(true);
+        return;
+      }
+    }
+    if (estado === 'Recapada' && fechaRecapado) {
+      const fecha = new Date(fechaRecapado);
+      if (fecha > hoy) {
+        setMensaje('La fecha de recapado no puede ser mayor a la fecha actual.');
+        setMostrarMensaje(true);
+        return;
+      }
+    }
+    if (estado === 'DobleRecapada' && fechaDobleRecapada) {
+      const fecha = new Date(fechaDobleRecapada);
+      if (fecha > hoy) {
+        setMensaje('La fecha de doble recapada no puede ser mayor a la fecha actual.');
+        setMostrarMensaje(true);
+        return;
+      }
+    }
     if (editando) {
       // Normalizar el estado para el backend
       let estadoEnviar = estado;
@@ -126,9 +153,9 @@ export default function FormularioCubierta() {
         } else {
           setMontajeActual(null);
         }
-        setMensaje('Cubierta existente, puedes editar el estado.');
-        setMostrarMensaje(true);
-        setTimeout(() => setMostrarMensaje(false), 4000);
+  setMensaje('<b>ℹ️ Cubierta existente, puedes editar el estado.</b>');
+  setMostrarMensaje(true);
+  setTimeout(() => setMostrarMensaje(false), 4000);
       } else {
         setEditando(false);
         setMontajeActual(null);
@@ -231,7 +258,9 @@ export default function FormularioCubierta() {
           </div>
         )}
         {mostrarMensaje && mensaje && mensaje !== 'Cubierta guardada correctamente' && mensaje !== '✅ Estado actualizado correctamente' && (
-          <p className={`mt-4 text-base text-red-600`}>{mensaje}</p>
+          <div className="mt-6 p-4 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800 text-center font-semibold shadow" style={{whiteSpace: 'pre-line'}}>
+            <span dangerouslySetInnerHTML={{__html: mensaje}} />
+          </div>
         )}
         {montajeActual && (
           <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800 text-center font-semibold shadow">

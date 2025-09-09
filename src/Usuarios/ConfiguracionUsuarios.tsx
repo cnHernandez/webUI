@@ -5,7 +5,7 @@ import { RolUsuario } from "../models/Usuario";
 interface Usuario {
   id: number;
   nombreUsuario: string;
-  contraseñaHash: string;
+  contrasena: string;
   rol: RolUsuario;
 }
 
@@ -16,7 +16,7 @@ interface ConfiguracionUsuariosProps {
 export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuariosProps) {
   // Estado para modal de creación de usuario
   const [showCrearModal, setShowCrearModal] = useState(false);
-  const [nuevoUsuario, setNuevoUsuario] = useState<{ nombreUsuario: string; contraseña: string; rol: RolUsuario | '' }>({ nombreUsuario: '', contraseña: '', rol: '' });
+  const [nuevoUsuario, setNuevoUsuario] = useState<{ nombreUsuario: string; contrasena: string; rol: RolUsuario | '' }>({ nombreUsuario: '', contrasena: '', rol: '' });
   const [crearLoading, setCrearLoading] = useState(false);
   // Función para mostrar el nombre del rol
   function mostrarRol(rol: RolUsuario) {
@@ -55,11 +55,11 @@ export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuario
   };
 
   const handleSave = async () => {
-    if (!editId || !editData.nombreUsuario || !editData.contraseñaHash || !editData.rol) return;
+  if (!editId || !editData.nombreUsuario || !editData.contrasena || !editData.rol) return;
     try {
       await modificarUsuario(editId, {
         nombreUsuario: editData.nombreUsuario,
-        contraseñaHash: editData.contraseñaHash,
+        contrasena: editData.contrasena,
         rol: editData.rol
       });
       setUsuarios(usuarios.map(u => u.id === editId ? { ...u, ...editData } as Usuario : u));
@@ -108,7 +108,7 @@ export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuario
             <tr key={usuario.id} className="border-t">
               {/* <td className="py-2 px-3">{usuario.id}</td> */}
               <td className="py-2 px-3">{usuario.nombreUsuario}</td>
-              <td className="py-2 px-3">{usuario.contraseñaHash}</td>
+              <td className="py-2 px-3">{usuario.contrasena}</td>
               <td className="py-2 px-3">{mostrarRol(usuario.rol)}</td>
               <td className="py-2 px-3 flex gap-2">
                 <button className="text-blue-600 hover:underline" onClick={() => handleEdit(usuario)}>Editar</button>
@@ -148,8 +148,8 @@ export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuario
               <input
                 className="w-full border rounded px-2 py-1 mt-1"
                 type="password"
-                value={nuevoUsuario.contraseña}
-                onChange={e => setNuevoUsuario(u => ({ ...u, contraseña: e.target.value }))}
+                value={nuevoUsuario.contrasena}
+                onChange={e => setNuevoUsuario(u => ({ ...u, contrasena: e.target.value }))}
               />
             </label>
             <label className="block mb-4">
@@ -168,7 +168,7 @@ export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuario
               <button className="px-3 py-1 bg-gray-200 rounded" onClick={() => setShowCrearModal(false)} disabled={crearLoading}>Cancelar</button>
               <button
                 className="px-3 py-1 bg-blue-600 text-white rounded"
-                disabled={crearLoading || !nuevoUsuario.nombreUsuario || !nuevoUsuario.contraseña || !nuevoUsuario.rol}
+                disabled={crearLoading || !nuevoUsuario.nombreUsuario || !nuevoUsuario.contrasena || !nuevoUsuario.rol}
                 onClick={async () => {
                   setCrearLoading(true);
                   setError(null);
@@ -177,14 +177,14 @@ export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuario
                     const { registrarUsuario, listarUsuarios } = await import("../serviceUsuario/usuarios");
                     await registrarUsuario({
                       nombreUsuario: nuevoUsuario.nombreUsuario,
-                      contraseña: nuevoUsuario.contraseña,
+                      contrasena: nuevoUsuario.contrasena,
                       rol: nuevoUsuario.rol
                     });
                     setMensaje('✅ Usuario creado correctamente');
                     setMostrarMensaje(true);
                     setTimeout(() => setMostrarMensaje(false), 3000);
                     setShowCrearModal(false);
-                    setNuevoUsuario({ nombreUsuario: '', contraseña: '', rol: '' });
+                    setNuevoUsuario({ nombreUsuario: '', contrasena: '', rol: '' });
                     // Refrescar lista
                     const lista = await listarUsuarios();
                     setUsuarios(lista);
@@ -210,7 +210,7 @@ export default function ConfiguracionUsuarios({ onVolver }: ConfiguracionUsuario
             </label>
             <label className="block mb-2">
               Contraseña:
-              <input className="w-full border rounded px-2 py-1 mt-1" value={editData.contraseñaHash || ''} onChange={e => setEditData(d => ({ ...d, contraseñaHash: e.target.value }))} />
+              <input className="w-full border rounded px-2 py-1 mt-1" value={editData.contrasena || ''} onChange={e => setEditData(d => ({ ...d, contrasena: e.target.value }))} />
             </label>
             <label className="block mb-4">
               Rol:

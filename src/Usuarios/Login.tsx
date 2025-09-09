@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { loginUsuario } from "../serviceUsuario/login";
 import type { UsuarioDto } from "./types";
 import logo from '../assets/logo.png';
@@ -10,11 +11,12 @@ interface LoginProps {
 }
 
 const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
-  const [form, setForm] = useState<UsuarioDto>({ nombreUsuario: "", contraseña: "" });
+  const [form, setForm] = useState<UsuarioDto>({ nombreUsuario: "", contrasena: "" });
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+  setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,15 +46,26 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
           required
           className="border p-2 rounded"
         />
-        <input
-          name="contraseña"
-          type="password"
-          value={form.contraseña}
-          onChange={handleChange}
-          placeholder="Contraseña"
-          required
-          className="border p-2 rounded"
-        />
+        <div className="relative">
+          <input
+            name="contrasena"
+            type={showPassword ? "text" : "password"}
+            value={form.contrasena}
+            onChange={handleChange}
+            placeholder="Contraseña"
+            required
+            className="border p-2 rounded w-full pr-10"
+          />
+          <button
+            type="button"
+            tabIndex={-1}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none"
+            onClick={() => setShowPassword((prev) => !prev)}
+            aria-label={showPassword ? "Ocultar contraseña" : "Mostrar contraseña"}
+          >
+            {showPassword ? <FaEye /> : <FaEyeSlash />}
+          </button>
+        </div>
         <button type="submit" className="bg-blue-600 text-white py-2 rounded hover:bg-blue-700">Ingresar</button>
         {error && <div className="text-red-600 text-center">{error}</div>}
       </form>
