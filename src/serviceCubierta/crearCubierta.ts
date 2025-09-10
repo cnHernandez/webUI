@@ -3,9 +3,10 @@ export async function crearCubierta(data: {
   Marca: string;
   Medida: string;
   FechaCompra: string;
-  Estado: 'Nueva' | 'Recapada' | 'DobleRecapada';
+  Estado: 'Nueva' | 'Recapada' | 'DobleRecapada' | 'TripleRecapada';
   FechaRecapado?: string;
   FechaDobleRecapada?: string;
+  FechaTripleRecapada?: string;
 }): Promise<string> {
   try {
     const body: any = {
@@ -16,7 +17,8 @@ export async function crearCubierta(data: {
       EstadoInfo: {
         Estado: data.Estado,
         FechaRecapada: data.FechaRecapado ? data.FechaRecapado + 'T00:00:00' : undefined,
-        FechaDobleRecapada: data.FechaDobleRecapada ? data.FechaDobleRecapada + 'T00:00:00' : undefined
+        FechaDobleRecapada: data.FechaDobleRecapada ? data.FechaDobleRecapada + 'T00:00:00' : undefined,
+        FechaTripleRecapada: data.FechaTripleRecapada ? data.FechaTripleRecapada + 'T00:00:00' : undefined
       }
     };
     const response = await fetch('http://localhost:5058/api/cubiertas', {

@@ -43,6 +43,7 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
   const estadoTraducido = traducirEstadoCubierta(estado);
   const fechaRecapada = cubierta.estadoInfo?.['FechaRecapada'] ?? cubierta.estadoInfo?.['fechaRecapada'] ?? cubierta.fechaRecapada;
   const fechaDobleRecapada = cubierta.estadoInfo?.['FechaDobleRecapada'] ?? cubierta.estadoInfo?.['fechaDobleRecapada'] ?? cubierta.fechaDobleRecapada;
+  const fechaTripleRecapada = cubierta.estadoInfo?.['FechaTripleRecapada'] ?? cubierta.estadoInfo?.['fechaTripleRecapada'] ?? cubierta.fechaTripleRecapada;
 
   const fechaReparacion = cubierta['FechaReparacion'] ?? cubierta.fechaReparacion ?? '-';
  
@@ -81,6 +82,10 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
             <tr>
               <td className="font-semibold p-2 border border-gray-300">Fecha Doble Recapada</td>
               <td className="p-2 border border-gray-300">{fechaDobleRecapada ? new Date(fechaDobleRecapada).toLocaleDateString() : '-'}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold p-2 border border-gray-300">Fecha Triple Recapada</td>
+              <td className="p-2 border border-gray-300">{fechaTripleRecapada ? new Date(fechaTripleRecapada).toLocaleDateString() : '-'}</td>
             </tr>
             <tr>
               <td className="font-semibold p-2 border border-gray-300">Fecha Reparación</td>

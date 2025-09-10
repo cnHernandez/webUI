@@ -13,6 +13,7 @@ export default function FormularioCubierta() {
   const [estado, setEstado] = useState('Nueva');
   const [fechaRecapado, setFechaRecapado] = useState('');
   const [fechaDobleRecapada, setFechaDobleRecapada] = useState('');
+  const [fechaTripleRecapada, setFechaTripleRecapada] = useState('');
   const [motivoCambio, setMotivoCambio] = useState('');
   const [mensaje, setMensaje] = useState('');
   // Controla visibilidad del mensaje
@@ -62,7 +63,8 @@ export default function FormularioCubierta() {
         estadoEnviar,
         fechaRecapado,
         fechaDobleRecapada,
-        estadoEnviar === 'EnReparacion' ? motivoCambio : undefined
+        estadoEnviar === 'EnReparacion' ? motivoCambio : undefined,
+        estadoEnviar === 'TripleRecapada' ? fechaTripleRecapada : undefined
       );
       if (result === 'Estado actualizado correctamente') {
         setMensaje('✅ Estado actualizado correctamente');
@@ -78,6 +80,7 @@ export default function FormularioCubierta() {
       setEstado('Nueva');
       setFechaRecapado('');
       setFechaDobleRecapada('');
+      setFechaTripleRecapada('');
       setMotivoCambio('');
       setEditando(false);
       setMontajeActual(null);
@@ -91,6 +94,7 @@ export default function FormularioCubierta() {
       Estado: estado as any,
       FechaRecapado: estado === 'Recapada' ? fechaRecapado : undefined,
       FechaDobleRecapada: estado === 'DobleRecapada' ? fechaDobleRecapada : undefined,
+      FechaTripleRecapada: estado === 'TripleRecapada' ? fechaTripleRecapada : undefined,
     });
     setMensaje(result);
     setMostrarMensaje(true);
@@ -103,6 +107,7 @@ export default function FormularioCubierta() {
       setEstado('Nueva');
       setFechaRecapado('');
       setFechaDobleRecapada('');
+      setFechaTripleRecapada('');
     }
   };
 
@@ -124,13 +129,16 @@ export default function FormularioCubierta() {
         let estadoActual = cubierta.estadoInfo?.Estado ?? 'Nueva';
         // Normalizar para el select
         if (typeof estadoActual === 'number') {
-          estadoActual = ['Nueva', 'Recapada', 'DobleRecapada', 'En Reparación'][estadoActual] ?? 'Nueva';
+          estadoActual = ['Nueva', 'Recapada', 'DobleRecapada', 'TripleRecapada', 'En Reparación'][estadoActual] ?? 'Nueva';
         }
         if (estadoActual === 'EnReparacion' || estadoActual === 'enReparacion' || estadoActual === 'En Reparación') {
           estadoActual = 'En Reparación';
         }
         if (estadoActual === 'DobleRecapada' || estadoActual === 'Doble Recapada') {
           estadoActual = 'DobleRecapada';
+        }
+        if (estadoActual === 'TripleRecapada' || estadoActual === 'Triple Recapada') {
+          estadoActual = 'TripleRecapada';
         }
         if (estadoActual === 'Recapada' || estadoActual === 'recapada') {
           estadoActual = 'Recapada';
@@ -223,6 +231,7 @@ export default function FormularioCubierta() {
                   <option value="Nueva">Nueva</option>
                   <option value="Recapada">Recapada</option>
                   <option value="DobleRecapada">Doble Recapada</option>
+                  <option value="TripleRecapada">Triple Recapada</option>
                   <option value="EnReparacion">En Reparación</option>
                 </select>
               </label>
@@ -234,6 +243,11 @@ export default function FormularioCubierta() {
               {estado === 'DobleRecapada' && (
                 <label className="font-medium text-black block mt-0">Fecha de doble recapada
                   <input type="date" value={fechaDobleRecapada} onChange={e => setFechaDobleRecapada(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-0 text-white bg-gray-800" />
+                </label>
+              )}
+              {estado === 'TripleRecapada' && (
+                <label className="font-medium text-black block mt-0">Fecha de triple recapada
+                  <input type="date" value={fechaTripleRecapada} onChange={e => setFechaTripleRecapada(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-0 text-white bg-gray-800" />
                 </label>
               )}
               {(estado === 'EnReparacion' || estado === 'En Reparación') && (

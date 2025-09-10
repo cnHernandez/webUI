@@ -4,7 +4,8 @@ export async function actualizarEstadoCubierta(
   estado: string,
   fechaRecapada?: string,
   fechaDobleRecapada?: string,
-  motivoCambio?: string
+  motivoCambio?: string,
+  fechaTripleRecapada?: string
 ): Promise<string> {
   try {
     let estadoStr = estado;
@@ -23,6 +24,7 @@ export async function actualizarEstadoCubierta(
   const body: any = { Estado: estadoStr };
   if (estadoStr === 'Recapada' && fechaRecapada) body.FechaRecapada = fechaRecapada;
   if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
+  if (estadoStr === 'TripleRecapada' && fechaTripleRecapada) body.FechaTripleRecapada = fechaTripleRecapada;
   if (estadoStr === 'EnReparacion' && motivoCambio) body.MotivoCambio = motivoCambio;
 
   
