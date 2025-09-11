@@ -1,5 +1,8 @@
 # Etapa de build
+
 FROM node:21-slim AS builder
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/*
 WORKDIR /app
 COPY package.json package-lock.json* ./

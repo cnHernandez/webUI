@@ -2,7 +2,8 @@ import type { Colectivo } from '../models/Colectivo';
 
 export async function listarColectivos(): Promise<Colectivo[]> {
   try {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/colectivos`);
+  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
+  const response = await fetch(`${apiHost}/api/colectivos`);
     if (response.ok) {
       const data = await response.json();
       return data.map((c: any) => ({
