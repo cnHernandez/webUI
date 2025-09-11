@@ -21,7 +21,7 @@ export async function crearCubierta(data: {
         FechaTripleRecapada: data.FechaTripleRecapada ? data.FechaTripleRecapada + 'T00:00:00' : undefined
       }
     };
-    const response = await fetch('http://localhost:5058/api/cubiertas', {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)

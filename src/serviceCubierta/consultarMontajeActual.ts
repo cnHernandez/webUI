@@ -1,7 +1,7 @@
 // Consulta si hay una cubierta montada en un colectivo y ubicación específicos
 export async function consultarMontajeActual(idColectivo: number, idUbicacion: number) {
   try {
-    const response = await fetch(`http://localhost:5058/api/montajes/actual/${idColectivo}/${idUbicacion}`);
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/montajes/actual/${idColectivo}/${idUbicacion}`);
     if (!response.ok) return null;
     const contentType = response.headers.get('content-type');
     const contentLength = response.headers.get('content-length');

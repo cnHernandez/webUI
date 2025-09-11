@@ -30,7 +30,7 @@ export async function actualizarEstadoCubierta(
   
 
    
-    const response = await fetch(`http://localhost:5058/api/cubiertas/nroserie/${nroSerie}/estado`, {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas/nroserie/${nroSerie}/estado`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),

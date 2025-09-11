@@ -2,7 +2,7 @@ import type { Cubierta } from '../models/Cubierta';
 
 export async function listarCubiertas(): Promise<Cubierta[]> {
   try {
-    const response = await fetch('http://localhost:5058/api/cubiertas');
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas`);
     if (response.ok) {
       const data = await response.json();
      

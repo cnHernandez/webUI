@@ -2,7 +2,7 @@ import type { HistorialMontaje } from '../models/HistorialMontaje';
 
 export async function obtenerHistorialMontajeCubierta(idCubierta: number): Promise<HistorialMontaje[]> {
   try {
-    const response = await fetch(`http://localhost:5058/api/montajes/historialcubierta/${idCubierta}`);
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/montajes/historialcubierta/${idCubierta}`);
     if (!response.ok) {
       // Si es 404, simplemente retornar [] sin hacer nada
       return [];

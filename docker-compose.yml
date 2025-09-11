@@ -1,0 +1,16 @@
+version: '3.8'
+services:
+  ui:
+    build:
+      context: .
+    ports:
+      - "8080:80"
+    networks:
+      - webnet
+    environment:
+      # Cambia esto si tu UI necesita otra variable para la URL de la API
+      - VITE_API_URL=http://api:80
+
+networks:
+  webnet:
+    external: true
