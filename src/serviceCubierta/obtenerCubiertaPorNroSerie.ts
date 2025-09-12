@@ -4,7 +4,8 @@ export async function obtenerCubiertaPorNroSerie(nroSerie: string): Promise<Cubi
   try {
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas/nroserie/${nroSerie}`);
     if (response.ok) {
-      return await response.json();
+      const data = await response.json();
+      return data;
     }
     return null;
   } catch {

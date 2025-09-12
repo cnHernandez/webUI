@@ -1,4 +1,4 @@
-export type EstadoCubierta = 'Nueva' | 'Recapada' | 'DobleRecapada' | 'TripleRecapada' | 'EnReparacion' | 0 | 1 | 2 | 3 | 4 | string | number;
+export type EstadoCubierta = 'Nueva' | 'Recapada' | 'DobleRecapada' | 'TripleRecapada' | 'EnReparacion' | 'Emparchada' | 0 | 1 | 2 | 3 | 4 | 5 | string | number;
 export type EstadoCubiertaInfo = {
   Estado?: string;
   estado?: string;
@@ -8,6 +8,8 @@ export type EstadoCubiertaInfo = {
   fechaDobleRecapada?: string;
   FechaTripleRecapada?: string;
   fechaTripleRecapada?: string;
+  FechaEmparchada?: string;
+  fechaEmparchada?: string;
   MotivoCambio?: string;
   motivoCambio?: string;
   [key: string]: any;
@@ -25,6 +27,8 @@ export type Cubierta = {
   fechaTripleRecapada?: string;
   fechaReparacion?: string;
   FechaReparacion?: string;
+  fechaEmparchada?: string;
+  FechaEmparchada?: string;
   idColectivo?: number;
   idUbicacion?: number;
   ubicacionDescripcion?: string;
@@ -51,12 +55,17 @@ export function traducirEstadoCubierta(estado: EstadoCubierta | undefined): stri
       case 'enReparacion':
       case 'en reparacion':
         return 'En Reparación';
+      case 'Emparchada':
+      case 'emparchada':
+        return 'Emparchada';
       case '3':
         return 'Doble Recapada';
       case '2':
         return 'Doble Recapada';
       case '4':
         return 'Triple Recapada';
+      case '5':
+        return 'Emparchada';
       case '1':
         return 'Recapada';
       case '0':
@@ -75,6 +84,8 @@ export function traducirEstadoCubierta(estado: EstadoCubierta | undefined): stri
       return 'Doble Recapada';
     case 4:
       return 'Triple Recapada';
+    case 5:
+      return 'Emparchada';
     default:
       return '-';
   }

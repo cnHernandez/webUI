@@ -29,6 +29,8 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
       });
   }, [nroSerie]);
 
+
+
   if (loading) return <div className="p-4">Cargando perfil...</div>;
   if (error) return <div className="p-4 text-red-600">{error}</div>;
   if (!cubierta) return <div className="p-4 text-gray-500">No se encontró la cubierta.</div>;
@@ -46,6 +48,7 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
   const fechaTripleRecapada = cubierta.estadoInfo?.['FechaTripleRecapada'] ?? cubierta.estadoInfo?.['fechaTripleRecapada'] ?? cubierta.fechaTripleRecapada;
 
   const fechaReparacion = cubierta['FechaReparacion'] ?? cubierta.fechaReparacion ?? '-';
+  const fechaEmparchada = cubierta.estadoInfo?.['FechaEmparchada'] ?? cubierta.estadoInfo?.['fechaEmparchada'] ?? cubierta.fechaEmparchada;
  
 
   return (
@@ -90,6 +93,10 @@ export default function PerfilCubierta({ nroSerie, onVolver }: PerfilCubiertaPro
             <tr>
               <td className="font-semibold p-2 border border-gray-300">Fecha Reparación</td>
               <td className="p-2 border border-gray-300">{fechaReparacion !== '-' && fechaReparacion ? new Date(fechaReparacion).toLocaleDateString() : '-'}</td>
+            </tr>
+            <tr>
+              <td className="font-semibold p-2 border border-gray-300">Fecha Emparchada</td>
+              <td className="p-2 border border-gray-300">{fechaEmparchada ? new Date(fechaEmparchada).toLocaleDateString() : '-'}</td>
             </tr>
           </tbody>
         </table>

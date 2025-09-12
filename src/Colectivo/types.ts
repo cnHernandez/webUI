@@ -1,4 +1,4 @@
-export type EstadoCubierta = 'Nueva' | 'Recapada' | 'DobleRecapada';
+export type EstadoCubierta = 'Nueva' | 'Recapada' | 'DobleRecapada' | 'TripleRecapada' | 'EnReparacion' | 'Emparchada';
 export type Cubierta = {
   IdCubierta: number;
   NroSerie: string;
@@ -6,6 +6,7 @@ export type Cubierta = {
   Medida: string;
   FechaCompra: string;
   Estado: EstadoCubierta;
+  FechaEmparchada?: string;
 };
 
 export type Colectivo = {

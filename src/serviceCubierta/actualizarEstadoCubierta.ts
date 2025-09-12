@@ -5,7 +5,8 @@ export async function actualizarEstadoCubierta(
   fechaRecapada?: string,
   fechaDobleRecapada?: string,
   motivoCambio?: string,
-  fechaTripleRecapada?: string
+  fechaTripleRecapada?: string,
+  fechaEmparchada?: string
 ): Promise<string> {
   try {
     let estadoStr = estado;
@@ -26,10 +27,18 @@ export async function actualizarEstadoCubierta(
   if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
   if (estadoStr === 'TripleRecapada' && fechaTripleRecapada) body.FechaTripleRecapada = fechaTripleRecapada;
   if (estadoStr === 'EnReparacion' && motivoCambio) body.MotivoCambio = motivoCambio;
+  if (estadoStr === 'Emparchada' && fechaEmparchada) body.FechaEmparchada = fechaEmparchada;
+  // Eliminar claves con valor vacío o undefined
+  Object.keys(body).forEach(key => {
+    if (body[key] === '' || body[key] === undefined) {
+      delete body[key];
+    }
+  });
 
   
 
    
+  console.log('Body enviado a actualizarEstadoCubierta:', body);
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas/nroserie/${nroSerie}/estado`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },

@@ -189,7 +189,9 @@ const ListaStockCubiertas: React.FC = () => {
               <option value="Nueva">Nueva</option>
               <option value="Recapada">Recapada</option>
               <option value="DobleRecapada">Doble Recapada</option>
+              <option value="TripleRecapada">Triple Recapada</option>
               <option value="EnReparacion">En Reparación</option>
+              <option value="Emparchada">Emparchada</option>
             </select>
           </div>
         </div>

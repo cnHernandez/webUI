@@ -15,6 +15,7 @@ export default function FormularioCubierta() {
   const [fechaDobleRecapada, setFechaDobleRecapada] = useState('');
   const [fechaTripleRecapada, setFechaTripleRecapada] = useState('');
   const [motivoCambio, setMotivoCambio] = useState('');
+  const [fechaEmparchada, setFechaEmparchada] = useState('');
   const [mensaje, setMensaje] = useState('');
   // Controla visibilidad del mensaje
   const [mostrarMensaje, setMostrarMensaje] = useState(false);
@@ -64,7 +65,8 @@ export default function FormularioCubierta() {
         fechaRecapado,
         fechaDobleRecapada,
         estadoEnviar === 'EnReparacion' ? motivoCambio : undefined,
-        estadoEnviar === 'TripleRecapada' ? fechaTripleRecapada : undefined
+        estadoEnviar === 'TripleRecapada' ? fechaTripleRecapada : undefined,
+        estadoEnviar === 'Emparchada' ? fechaEmparchada : undefined
       );
       if (result === 'Estado actualizado correctamente') {
         setMensaje('✅ Estado actualizado correctamente');
@@ -82,9 +84,10 @@ export default function FormularioCubierta() {
       setFechaDobleRecapada('');
       setFechaTripleRecapada('');
       setMotivoCambio('');
-      setEditando(false);
-      setMontajeActual(null);
-      return;
+  setEditando(false);
+  setMontajeActual(null);
+  setFechaEmparchada('');
+  return;
     }
     const result = await crearCubierta({
       NroSerie: nroSerie,
@@ -95,6 +98,7 @@ export default function FormularioCubierta() {
       FechaRecapado: estado === 'Recapada' ? fechaRecapado : undefined,
       FechaDobleRecapada: estado === 'DobleRecapada' ? fechaDobleRecapada : undefined,
       FechaTripleRecapada: estado === 'TripleRecapada' ? fechaTripleRecapada : undefined,
+      FechaEmparchada: estado === 'Emparchada' ? fechaEmparchada : undefined,
     });
     setMensaje(result);
     setMostrarMensaje(true);
@@ -108,6 +112,7 @@ export default function FormularioCubierta() {
       setFechaRecapado('');
       setFechaDobleRecapada('');
       setFechaTripleRecapada('');
+      setFechaEmparchada('');
     }
   };
 
@@ -147,6 +152,13 @@ export default function FormularioCubierta() {
           estadoActual = 'Nueva';
         }
         setEstado(estadoActual);
+        if (estadoActual === 'Emparchada' && cubierta.fechaEmparchada) {
+          let fechaEmp = cubierta.fechaEmparchada;
+          if (fechaEmp && fechaEmp.includes('T')) fechaEmp = fechaEmp.split('T')[0];
+          setFechaEmparchada(fechaEmp);
+        } else {
+          setFechaEmparchada('');
+        }
         setEditando(true);
         // Consultar si está montada actualmente
         if (cubierta.idCubierta) {
@@ -233,8 +245,14 @@ export default function FormularioCubierta() {
                   <option value="DobleRecapada">Doble Recapada</option>
                   <option value="TripleRecapada">Triple Recapada</option>
                   <option value="EnReparacion">En Reparación</option>
+                  <option value="Emparchada">Emparchada</option>
                 </select>
               </label>
+              {estado === 'Emparchada' && (
+                <label className="font-medium text-black block mt-0">Fecha de emparchado
+                  <input type="date" value={fechaEmparchada} onChange={e => setFechaEmparchada(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-0 text-white bg-gray-800" />
+                </label>
+              )}
               {estado === 'Recapada' && (
                 <label className="font-medium text-black block mt-0">Fecha de recapado
                   <input type="date" value={fechaRecapado} onChange={e => setFechaRecapado(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-0 text-white bg-gray-800" />
@@ -278,7 +296,7 @@ export default function FormularioCubierta() {
         )}
         {montajeActual && (
           <div className="mt-4 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800 text-center font-semibold shadow">
-            <span>Actualmente montada en colectivo <b>{montajeActual.nroColectivo}</b>, ubicación <b>{montajeActual.descripcionUbicacion}</b></span>
+            <span>Actualmente montada en colectivo <b>{montajeActual?.nroColectivo}</b>, ubicación <b>{montajeActual?.descripcionUbicacion}</b></span>
           </div>
         )}
       </div>
