@@ -1,3 +1,5 @@
+# Entornos locales
+.env
 # Logs
 logs
 *.log

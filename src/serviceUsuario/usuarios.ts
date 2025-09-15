@@ -1,3 +1,5 @@
+import { getApiKeyHeaders } from '../utilsApiKey';
+
 export async function registrarUsuario({ nombreUsuario, contrasena, rol }: { nombreUsuario: string; contrasena: string; rol: number | string }) {
   const body = {
     nombreUsuario,
@@ -7,7 +9,7 @@ export async function registrarUsuario({ nombreUsuario, contrasena, rol }: { nom
   const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const response = await fetch(`${apiHost}/api/usuarios/registrar`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: getApiKeyHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(body)
   });
   if (!response.ok) throw new Error(await response.text());
@@ -17,7 +19,9 @@ import type { Usuario } from "../models/Usuario";
 
 export async function listarUsuarios(): Promise<Usuario[]> {
   const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const response = await fetch(`${apiHost}/api/usuarios/listado`);
+  const response = await fetch(`${apiHost}/api/usuarios/listado`, {
+    headers: getApiKeyHeaders()
+  });
   if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   // Mapear Contraseña a contrasena
@@ -32,7 +36,8 @@ export async function listarUsuarios(): Promise<Usuario[]> {
 export async function eliminarUsuario(id: number) {
   const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const response = await fetch(`${apiHost}/api/usuarios/baja/${id}`, {
-    method: "DELETE"
+    method: "DELETE",
+    headers: getApiKeyHeaders()
   });
   if (!response.ok) throw new Error(await response.text());
   return response.text();
@@ -47,7 +52,7 @@ export async function modificarUsuario(id: number, usuario: Omit<Usuario, 'id'>)
   const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const response = await fetch(`${apiHost}/api/usuarios/modificar/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: getApiKeyHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify(body)
   });
   if (!response.ok) throw new Error(await response.text());

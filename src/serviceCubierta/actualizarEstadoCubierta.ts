@@ -39,9 +39,10 @@ export async function actualizarEstadoCubierta(
 
    
   console.log('Body enviado a actualizarEstadoCubierta:', body);
+  const { getApiKeyHeaders } = await import('../utilsApiKey');
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas/nroserie/${nroSerie}/estado`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getApiKeyHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(body),
     });
     if (response.ok) {

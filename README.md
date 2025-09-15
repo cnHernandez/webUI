@@ -1,3 +1,14 @@
+# Seguridad de la API Key
+
+Para acceder a la API, es obligatorio enviar la cabecera `x-api-key` en todas las peticiones. La clave debe almacenarse en el archivo `.env` como:
+
+```
+VITE_API_KEY=QnVydmVsYUFwaVNlY3VyaXR5IzEyMg=
+```
+
+Nunca subas tu archivo `.env` a GitHub. Usa `.env.example` como plantilla para compartir la estructura de variables de entorno.
+
+El frontend utiliza la utilidad `getApiKeyHeaders` para agregar la cabecera de forma segura en cada request.
 # React + TypeScript + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.

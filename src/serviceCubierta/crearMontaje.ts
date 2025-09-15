@@ -5,9 +5,10 @@ export async function crearMontaje(data: {
   MotivoCambio?: string;
 }): Promise<string> {
   try {
+  const { getApiKeyHeaders } = await import('../utilsApiKey');
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/montajes`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getApiKeyHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({
         ...data,
         FechaInstalacion: new Date().toISOString()

@@ -22,9 +22,10 @@ export async function crearCubierta(data: {
       FechaCompra: data.FechaCompra + 'T00:00:00',
       EstadoInfo: estadoInfo
     };
+  const { getApiKeyHeaders } = await import('../utilsApiKey');
   const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: getApiKeyHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify(body)
     });
     if (response.ok) return 'Cubierta guardada correctamente';
