@@ -1,12 +1,13 @@
 import FormularioCubierta from './Cubiertas/FormularioCubierta';
 import FormularioMontaje from './Cubiertas/FormularioMontaje';
 import ConfiguracionUsuarios from './Usuarios/ConfiguracionUsuarios';
-import Menu from './Layout/Menu';
+import Sidebar from './Layout/Sidebar';
 import Login from './Usuarios/Login';
 import ListaStockCubiertas from './Cubiertas/ListaStockCubiertas';
 import { useState, useEffect } from 'react';
 import HistorialCubiertaTab from './Cubiertas/HistorialCubiertaTab';
 import { getOpcionesPorRol } from './Usuarios/rolUtils';
+import ListaColectivos from './Colectivo/ListaColectivos';
 
 
 type TabKey = 'ingreso' | 'rotacion' | 'stock' | 'historial';
@@ -17,6 +18,8 @@ function App() {
   const [rol, setRol] = useState<import('./models/Usuario').RolUsuario | null>(null);
   const [tab, setTab] = useState<TabKey>('ingreso');
   const [showConfiguracion, setShowConfiguracion] = useState(false);
+  const [mainSection, setMainSection] = useState<'gomeria' | 'aceite'>('gomeria');
+  // Eliminar evento abrirColectivos, ahora se navega con Sidebar
 
   // Relación entre opción y tabKey
   const tabMap: Record<string, TabKey> = {
@@ -69,35 +72,53 @@ function App() {
   const opciones = rol ? getOpcionesPorRol(rol).filter(o => ['Ingreso','Rotación','Stock','Historial'].includes(o)) : [];
 
   return (
-    <div className="min-h-screen w-screen bg-white flex flex-col">
-      <Menu nombreUsuario={nombreUsuario} rolUsuario={rol} onLogout={handleLogout} onConfiguracion={() => setShowConfiguracion(true)} />
-      {showConfiguracion ? (
-  <ConfiguracionUsuarios onVolver={() => setShowConfiguracion(false)} />
-      ) : (
-        <div className="w-screen bg-white rounded-none shadow-none p-0">
-          <div className="flex gap-4 border-b border-gray-200 pt-4 pb-2 justify-center">
-            {opciones.map(opcion => (
-              <button
-                key={opcion}
-                className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === tabMap[opcion] ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-                onClick={() => setTab(tabMap[opcion])}
-              >{opcion}</button>
-            ))}
+    <div className="min-h-screen w-screen bg-white flex">
+      <Sidebar
+        selected={mainSection}
+        onSelect={setMainSection}
+        nombreUsuario={nombreUsuario}
+        rolUsuario={rol}
+        onLogout={handleLogout}
+        onConfiguracion={() => {
+          setMainSection('gomeria');
+          setShowConfiguracion(true);
+        }}
+      />
+      <main className="flex-1">
+        {showConfiguracion ? (
+          <ConfiguracionUsuarios onVolver={() => setShowConfiguracion(false)} />
+        ) : mainSection === 'gomeria' ? (
+          <div className="w-full bg-white rounded-none shadow-none p-0">
+            <div className="flex gap-4 border-b border-gray-200 pt-4 pb-2 justify-center">
+              {opciones.map(opcion => (
+                <button
+                  key={opcion}
+                  className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === tabMap[opcion] ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
+                  onClick={() => setTab(tabMap[opcion])}
+                >{opcion}</button>
+              ))}
+            </div>
+            {tab === 'ingreso' && <FormularioCubierta />}
+            {tab === 'rotacion' && <FormularioMontaje />}
+            {tab === 'stock' && (
+              <div className="py-8">
+                <ListaStockCubiertas />
+              </div>
+            )}
+            {tab === 'historial' && (
+              <div className="py-8">
+                <HistorialCubiertaTab />
+              </div>
+            )}
           </div>
-          {tab === 'ingreso' && <FormularioCubierta />}
-          {tab === 'rotacion' && <FormularioMontaje />}
-          {tab === 'stock' && (
+        ) : mainSection === 'aceite' ? (
+          <div className="w-full bg-white rounded-none shadow-none p-0">
             <div className="py-8">
-              <ListaStockCubiertas />
+              <ListaColectivos />
             </div>
-          )}
-          {tab === 'historial' && (
-            <div className="py-8">
-              <HistorialCubiertaTab />
-            </div>
-          )}
-        </div>
-      )}
+          </div>
+        ) : null}
+      </main>
     </div>
   );
 }
