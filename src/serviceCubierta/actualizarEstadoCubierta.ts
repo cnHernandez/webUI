@@ -1,3 +1,4 @@
+import { apiService } from '../utils/apiService';
 
 export async function actualizarEstadoCubierta(
   nroSerie: string,
@@ -22,27 +23,22 @@ export async function actualizarEstadoCubierta(
       estadoStr = 'EnReparacion';
     }
     // El backend espera Estado, FechaRecapada, FechaDobleRecapada
-  const body: any = { Estado: estadoStr };
-  if (estadoStr === 'Recapada' && fechaRecapada) body.FechaRecapada = fechaRecapada;
-  if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
-  if (estadoStr === 'TripleRecapada' && fechaTripleRecapada) body.FechaTripleRecapada = fechaTripleRecapada;
-  if (estadoStr === 'EnReparacion' && motivoCambio) body.MotivoCambio = motivoCambio;
-  if (estadoStr === 'Emparchada' && fechaEmparchada) body.FechaEmparchada = fechaEmparchada;
-  // Eliminar claves con valor vacío o undefined
-  Object.keys(body).forEach(key => {
-    if (body[key] === '' || body[key] === undefined) {
-      delete body[key];
-    }
-  });
+    const body: any = { Estado: estadoStr };
+    if (estadoStr === 'Recapada' && fechaRecapada) body.FechaRecapada = fechaRecapada;
+    if (estadoStr === 'DobleRecapada' && fechaDobleRecapada) body.FechaDobleRecapada = fechaDobleRecapada;
+    if (estadoStr === 'TripleRecapada' && fechaTripleRecapada) body.FechaTripleRecapada = fechaTripleRecapada;
+    if (estadoStr === 'EnReparacion' && motivoCambio) body.MotivoCambio = motivoCambio;
+    if (estadoStr === 'Emparchada' && fechaEmparchada) body.FechaEmparchada = fechaEmparchada;
+    // Eliminar claves con valor vacío o undefined
+    Object.keys(body).forEach(key => {
+      if (body[key] === '' || body[key] === undefined) {
+        delete body[key];
+      }
+    });
 
-  
-
-   
-  console.log('Body enviado a actualizarEstadoCubierta:', body);
-  const { getApiKeyHeaders } = await import('../utilsApiKey');
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas/nroserie/${nroSerie}/estado`, {
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/cubiertas/nroserie/${nroSerie}/estado`, {
       method: 'PUT',
-      headers: getApiKeyHeaders({ 'Content-Type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
     });
     if (response.ok) {

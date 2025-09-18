@@ -1,3 +1,5 @@
+import { apiService } from '../utils/apiService';
+
 export async function crearCubierta(data: {
   NroSerie: string;
   Marca: string;
@@ -22,10 +24,9 @@ export async function crearCubierta(data: {
       FechaCompra: data.FechaCompra + 'T00:00:00',
       EstadoInfo: estadoInfo
     };
-  const { getApiKeyHeaders } = await import('../utilsApiKey');
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/cubiertas`, {
+    const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/cubiertas`, {
       method: 'POST',
-      headers: getApiKeyHeaders({ 'Content-Type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body)
     });
     if (response.ok) return 'Cubierta guardada correctamente';

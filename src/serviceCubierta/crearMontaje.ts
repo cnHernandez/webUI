@@ -1,3 +1,5 @@
+import { apiService } from '../utils/apiService';
+
 export async function crearMontaje(data: {
   IdCubierta: number;
   IdColectivo: number;
@@ -5,17 +7,14 @@ export async function crearMontaje(data: {
   MotivoCambio?: string;
 }): Promise<string> {
   try {
-  const { getApiKeyHeaders } = await import('../utilsApiKey');
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/montajes`, {
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/montajes`, {
       method: 'POST',
-      headers: getApiKeyHeaders({ 'Content-Type': 'application/json' }),
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...data,
         FechaInstalacion: new Date().toISOString()
       })
     });
-    
-   
     if (response.ok) return 'Montaje guardado correctamente';
     return 'Error al guardar el montaje';
   } catch {

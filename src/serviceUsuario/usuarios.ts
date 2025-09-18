@@ -1,4 +1,5 @@
-import { getApiKeyHeaders } from '../utilsApiKey';
+import { apiService } from '../utils/apiService';
+import type { Usuario } from "../models/Usuario";
 
 export async function registrarUsuario({ nombreUsuario, contrasena, rol }: { nombreUsuario: string; contrasena: string; rol: number | string }) {
   const body = {
@@ -6,22 +7,17 @@ export async function registrarUsuario({ nombreUsuario, contrasena, rol }: { nom
     contrasena,
     rol: typeof rol === 'string' ? (rol === "Administrador" ? 0 : rol === "Gomeria" ? 1 : Number(rol)) : rol
   };
-  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const response = await fetch(`${apiHost}/api/usuarios/registrar`, {
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/usuarios/registrar`, {
     method: "POST",
-    headers: getApiKeyHeaders({ "Content-Type": "application/json" }),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body)
   });
   if (!response.ok) throw new Error(await response.text());
   return response.text();
 }
-import type { Usuario } from "../models/Usuario";
 
 export async function listarUsuarios(): Promise<Usuario[]> {
-  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const response = await fetch(`${apiHost}/api/usuarios/listado`, {
-    headers: getApiKeyHeaders()
-  });
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/usuarios/listado`);
   if (!response.ok) throw new Error(await response.text());
   const data = await response.json();
   // Mapear Contraseña a contrasena
@@ -34,26 +30,17 @@ export async function listarUsuarios(): Promise<Usuario[]> {
 }
 
 export async function eliminarUsuario(id: number) {
-  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const response = await fetch(`${apiHost}/api/usuarios/baja/${id}`, {
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/usuarios/baja/${id}`, {
     method: "DELETE",
-    headers: getApiKeyHeaders()
   });
   if (!response.ok) throw new Error(await response.text());
-  return response.text();
 }
 
-export async function modificarUsuario(id: number, usuario: Omit<Usuario, 'id'>) {
-  const body = {
-    nombreUsuario: usuario.nombreUsuario,
-    contrasena: usuario.contrasena,
-    rol: usuario.rol === "Administrador" ? 0 : 1
-  };
-  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const response = await fetch(`${apiHost}/api/usuarios/modificar/${id}`, {
+export async function modificarUsuario(id: number, data: { nombreUsuario: string; contrasena: string; rol: number | string }) {
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/usuarios/modificar/${id}`, {
     method: "PUT",
-    headers: getApiKeyHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify(body)
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
   if (!response.ok) throw new Error(await response.text());
   return response.text();

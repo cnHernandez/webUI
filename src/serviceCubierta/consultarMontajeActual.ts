@@ -1,10 +1,9 @@
+import { apiService } from '../utils/apiService';
+
 // Consulta si hay una cubierta montada en un colectivo y ubicación específicos
 export async function consultarMontajeActual(idColectivo: number, idUbicacion: number) {
   try {
-  const { getApiKeyHeaders } = await import('../utilsApiKey');
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/api/montajes/actual/${idColectivo}/${idUbicacion}`, {
-    headers: getApiKeyHeaders()
-  });
+    const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/montajes/actual/${idColectivo}/${idUbicacion}`);
     if (!response.ok) return null;
     const contentType = response.headers.get('content-type');
     const contentLength = response.headers.get('content-length');

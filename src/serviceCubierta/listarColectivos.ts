@@ -1,12 +1,10 @@
 import type { Colectivo } from '../models/Colectivo';
+import { apiService } from '../utils/apiService';
 
 export async function listarColectivos(): Promise<Colectivo[]> {
   try {
-  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const { getApiKeyHeaders } = await import('../utilsApiKey');
-  const response = await fetch(`${apiHost}/api/colectivos`, {
-    headers: getApiKeyHeaders()
-  });
+  const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
+    const response = await apiService(`${apiHost}/api/colectivos`);
     if (response.ok) {
       const data = await response.json();
       return data.map((c: any) => ({

@@ -1,13 +1,10 @@
-
-
 import type { UsuarioDto } from "../Usuarios/types";
-import { getApiKeyHeaders } from '../utilsApiKey';
+import { apiService } from '../utils/apiService';
 
 export async function loginUsuario(usuario: UsuarioDto) {
-  const apiHost = import.meta.env.VITE_API_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-  const response = await fetch(`${apiHost}/api/usuarios/login`, {
+  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/usuarios/login`, {
     method: "POST",
-    headers: getApiKeyHeaders({ "Content-Type": "application/json" }),
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(usuario),
   });
   if (!response.ok) {
