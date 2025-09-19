@@ -24,6 +24,9 @@ export default function ListaColectivosVTV() {
 
   const hoy = new Date();
   const colectivosFiltrados = colectivos.filter(c => {
+    // Filtrar los que NO están fuera de servicio ni estado 1
+  const estadoStr = String(c.Estado);
+  if (estadoStr === 'FueraDeServicio' || estadoStr === '1') return false;
     if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
     if (filtroProximos) {
       if (!c.VtoVTV) return false;
@@ -180,7 +183,10 @@ export default function ListaColectivosVTV() {
       {modalEditar && (
         <FormularioEditarVtv
           colectivo={modalEditar}
-          onClose={() => setModalEditar(null)}
+          onClose={() => {
+            setModalEditar(null);
+            recargar();
+          }}
           onSave={async (fechaVto: string) => {
             await actualizarVtoVtvColectivo({ ...modalEditar, VtoVTV: fechaVto });
             setModalEditar(null);

@@ -69,7 +69,7 @@ export default function FormularioEditarVtv({ colectivo, onClose, onSave }: Prop
           <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
               <h3 className="text-lg font-bold mb-2 text-red-700">Confirmar baja de colectivo</h3>
-              <p className="mb-4 text-gray-700">¿Está seguro que desea dar de baja el colectivo <span className="font-semibold">{colectivo.NroColectivo}</span>? Esta acción no se puede deshacer.</p>
+              <p className="mb-4 text-gray-700">¿Está seguro que desea dar de baja el colectivo <span className="font-semibold">{colectivo.NroColectivo}</span>?</p>
               <div className="flex justify-center gap-4">
                 <button
                   className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
