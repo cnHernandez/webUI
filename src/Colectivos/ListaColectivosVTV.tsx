@@ -2,12 +2,15 @@ import { useEffect, useState } from 'react';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { registrarVtv } from '../serviceColectivo/registrarVtv';
 import type { Colectivo } from '../models/Colectivo';
+import FormularioEditarVtv from './FormularioEditarVtv';
+import { actualizarVtoVtvColectivo } from '../serviceColectivo/actualizarVtoVtvColectivo';
 
 export default function ListaColectivosVTV() {
   const [colectivos, setColectivos] = useState<Colectivo[]>([]);
   const [filtroNro, setFiltroNro] = useState('');
   const [filtroProximos, setFiltroProximos] = useState(false);
   const [modal, setModal] = useState<{ id: number; nro: string } | null>(null);
+  const [modalEditar, setModalEditar] = useState<Colectivo | null>(null);
   const [fecha, setFecha] = useState('');
   const [enviando, setEnviando] = useState(false);
   const [exito, setExito] = useState(false);
@@ -27,7 +30,8 @@ export default function ListaColectivosVTV() {
       const vto = new Date(c.VtoVTV);
       const dosMesesAntes = new Date(vto);
       dosMesesAntes.setMonth(vto.getMonth() - 2);
-      return hoy >= dosMesesAntes && hoy <= vto;
+      // Incluir próximos a vencer y vencidos
+      return hoy >= dosMesesAntes;
     }
     return true;
   });
@@ -127,7 +131,13 @@ export default function ListaColectivosVTV() {
                     <td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
                     <td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
                     <td className="border border-gray-300 p-2 text-center">{c.VtoVTV ? String(c.VtoVTV).slice(0,10) : '-'}</td>
-                    <td className="border border-gray-300 p-2 text-center">
+                    <td className="border border-gray-300 p-2 text-center flex gap-2 justify-center">
+                      <button
+                        className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                        onClick={() => setModalEditar(c)}
+                      >
+                        Editar
+                      </button>
                       <button
                         className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
                         onClick={() => abrirModal(c.IdColectivo, c.NroColectivo)}
@@ -165,6 +175,18 @@ export default function ListaColectivosVTV() {
             </form>
           </div>
         </div>
+      )}
+      {/* Modal para editar Vto VTV */}
+      {modalEditar && (
+        <FormularioEditarVtv
+          colectivo={modalEditar}
+          onClose={() => setModalEditar(null)}
+          onSave={async (fechaVto: string) => {
+            await actualizarVtoVtvColectivo({ ...modalEditar, VtoVTV: fechaVto });
+            setModalEditar(null);
+            recargar();
+          }}
+        />
       )}
     </div>
   );
