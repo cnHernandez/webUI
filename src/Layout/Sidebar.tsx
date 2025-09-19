@@ -1,17 +1,13 @@
 import React from 'react';
 import logo from '../assets/logo.png';
-import { RolUsuario } from '../models/Usuario';
+// import eliminado, ya no se usa
 
 interface SidebarProps {
   selected: 'gomeria' | 'aceite';
   onSelect: (key: 'gomeria' | 'aceite') => void;
-  nombreUsuario?: string | null;
-  rolUsuario?: string | null;
-  onLogout?: () => void;
-  onConfiguracion?: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ selected, onSelect, nombreUsuario, rolUsuario, onLogout, onConfiguracion }) => {
+const Sidebar: React.FC<SidebarProps> = ({ selected, onSelect }) => {
   return (
   <aside className="h-screen w-56 bg-white flex flex-col shadow-md">
       <div className="flex items-center justify-center h-24 px-4">
@@ -31,19 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ selected, onSelect, nombreUsuario, ro
           Aceite
         </button>
       </nav>
-      <div className="mt-auto px-4 py-4 flex flex-col gap-1">
-        <span className="text-sm text-gray-600">{nombreUsuario} {rolUsuario && `(${rolUsuario})`}</span>
-        {rolUsuario === RolUsuario.Administrador && (
-          <button
-            className="text-sm text-blue-700 hover:underline text-left"
-            onClick={onConfiguracion}
-          >Configuración</button>
-        )}
-        <button
-          className="text-sm text-red-600 hover:underline text-left"
-          onClick={onLogout}
-        >Cerrar sesión</button>
-      </div>
+      {/* El usuario y menú ahora se muestran en el header superior derecho */}
     </aside>
   );
 };

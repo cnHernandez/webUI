@@ -1,33 +1,38 @@
-import FormularioCubierta from './Cubiertas/FormularioCubierta';
-import FormularioMontaje from './Cubiertas/FormularioMontaje';
+import UserMenu from './Layout/UserMenu';
+import GomeriaTabs from './Cubiertas/GomeriaTabs';
 import ConfiguracionUsuarios from './Usuarios/ConfiguracionUsuarios';
 import Sidebar from './Layout/Sidebar';
 import Login from './Usuarios/Login';
-import ListaStockCubiertas from './Cubiertas/ListaStockCubiertas';
 import { useState, useEffect } from 'react';
-import HistorialCubiertaTab from './Cubiertas/HistorialCubiertaTab';
-import { getOpcionesPorRol } from './Usuarios/rolUtils';
-import ListaColectivos from './Colectivo/ListaColectivos';
 
+// import eliminado, ahora se usa AceiteTabs
 
-type TabKey = 'ingreso' | 'rotacion' | 'stock' | 'historial';
+import AceiteTabs from './Aceite/AceiteTabs';
+// type TabKey = 'ingreso' | 'rotacion' | 'stock' | 'historial';
+
 
 function App() {
   const [logueado, setLogueado] = useState<boolean>(false);
   const [nombreUsuario, setNombreUsuario] = useState<string | null>(null);
   const [rol, setRol] = useState<import('./models/Usuario').RolUsuario | null>(null);
-  const [tab, setTab] = useState<TabKey>('ingreso');
+  // const [tab, setTab] = useState<TabKey>('ingreso');
+  // const [aceiteTab, setAceiteTab] = useState<AceiteTabKey>('listado');
   const [showConfiguracion, setShowConfiguracion] = useState(false);
   const [mainSection, setMainSection] = useState<'gomeria' | 'aceite'>('gomeria');
-  // Eliminar evento abrirColectivos, ahora se navega con Sidebar
 
   // Relación entre opción y tabKey
-  const tabMap: Record<string, TabKey> = {
-    'Ingreso': 'ingreso',
-    'Rotación': 'rotacion',
-    'Stock': 'stock',
-    'Historial': 'historial',
-  };
+  // const tabMap: Record<string, TabKey> = {
+  //   'Ingreso': 'ingreso',
+  //   'Rotación': 'rotacion',
+  //   'Stock': 'stock',
+  //   'Historial': 'historial',
+  // };
+
+  // Opciones para Aceite
+  // const aceiteTabMap: Record<string, AceiteTabKey> = {
+  //   'Listado': 'listado',
+  //   'Historial': 'historial',
+  // };
 
   useEffect(() => {
     // Al iniciar, recuperar sesión si existe
@@ -37,13 +42,13 @@ function App() {
       setLogueado(true);
       setNombreUsuario(nombre);
       setRol(rolLocal);
-      const opciones = rolLocal ? getOpcionesPorRol(rolLocal) : [];
-      setTab(opciones.length ? tabMap[opciones[0]] : 'ingreso');
+  // const opciones = rolLocal ? getOpcionesPorRol(rolLocal) : [];
+  // setTab(opciones.length ? tabMap[opciones[0]] : 'ingreso');
     } else {
       setLogueado(false);
       setNombreUsuario(null);
       setRol(null);
-      setTab('ingreso');
+  // setTab('ingreso');
     }
   }, []);
 
@@ -53,7 +58,8 @@ function App() {
     setLogueado(false);
     setNombreUsuario(null);
     setRol(null);
-    setTab('ingreso');
+  // setTab('ingreso');
+  // setAceiteTab('listado');
   };
 
   if (!logueado) {
@@ -63,60 +69,43 @@ function App() {
       const rolLocal = localStorage.getItem('rolUsuario') as import('./models/Usuario').RolUsuario | null;
       setNombreUsuario(nombre);
       setRol(rolLocal);
-      const opciones = rolLocal ? getOpcionesPorRol(rolLocal) : [];
-      setTab(opciones.length ? tabMap[opciones[0]] : 'ingreso');
+  // const opciones = rolLocal ? getOpcionesPorRol(rolLocal) : [];
+          <AceiteTabs />
     }} />;
   }
 
   // Solo las solapas originales
-  const opciones = rol ? getOpcionesPorRol(rol).filter(o => ['Ingreso','Rotación','Stock','Historial'].includes(o)) : [];
+  // const opciones = rol ? getOpcionesPorRol(rol).filter(o => ['Ingreso','Rotación','Stock','Historial'].includes(o)) : [];
+  // Opciones para Aceite (puedes personalizar según el rol si lo necesitas)
+  // const aceiteOpciones = ['Listado', 'Historial'];
 
   return (
     <div className="min-h-screen w-screen bg-white flex">
       <Sidebar
         selected={mainSection}
         onSelect={setMainSection}
-        nombreUsuario={nombreUsuario}
-        rolUsuario={rol}
-        onLogout={handleLogout}
-        onConfiguracion={() => {
-          setMainSection('gomeria');
-          setShowConfiguracion(true);
-        }}
       />
       <main className="flex-1">
+        <div className="w-full flex justify-between items-center pt-6 pb-2 px-8">
+          <h1 className="text-3xl font-bold text-blue-700 text-center flex-1">MOGPSA</h1>
+          <div className="relative flex items-center justify-end" style={{ minWidth: 180 }}>
+            <UserMenu
+              nombreUsuario={nombreUsuario}
+              rolUsuario={rol}
+              onLogout={handleLogout}
+              onConfiguracion={() => {
+                setMainSection('gomeria');
+                setShowConfiguracion(true);
+              }}
+            />
+          </div>
+        </div>
         {showConfiguracion ? (
           <ConfiguracionUsuarios onVolver={() => setShowConfiguracion(false)} />
         ) : mainSection === 'gomeria' ? (
-          <div className="w-full bg-white rounded-none shadow-none p-0">
-            <div className="flex gap-4 border-b border-gray-200 pt-4 pb-2 justify-center">
-              {opciones.map(opcion => (
-                <button
-                  key={opcion}
-                  className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === tabMap[opcion] ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-                  onClick={() => setTab(tabMap[opcion])}
-                >{opcion}</button>
-              ))}
-            </div>
-            {tab === 'ingreso' && <FormularioCubierta />}
-            {tab === 'rotacion' && <FormularioMontaje />}
-            {tab === 'stock' && (
-              <div className="py-8">
-                <ListaStockCubiertas />
-              </div>
-            )}
-            {tab === 'historial' && (
-              <div className="py-8">
-                <HistorialCubiertaTab />
-              </div>
-            )}
-          </div>
+          <GomeriaTabs />
         ) : mainSection === 'aceite' ? (
-          <div className="w-full bg-white rounded-none shadow-none p-0">
-            <div className="py-8">
-              <ListaColectivos />
-            </div>
-          </div>
+          <AceiteTabs />
         ) : null}
       </main>
     </div>
