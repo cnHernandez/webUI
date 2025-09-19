@@ -15,7 +15,8 @@ export async function listarColectivos(): Promise<Colectivo[]> {
         Modelo: c.modelo,
         Año: c.año,
         Estado: c.estado, // Si necesitas mapear el número a string, avísame
-        Kilometraje: c.kilometraje
+        Kilometraje: c.kilometraje,
+        VtoVTV: c.vtoVTV ?? null,
       }));
     }
     return [];

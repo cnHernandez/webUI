@@ -1,3 +1,4 @@
+
 export type EstadoColectivo = 'Activo' | 'FueraDeServicio';
 export type Colectivo = {
   IdColectivo: number;
@@ -5,5 +6,6 @@ export type Colectivo = {
   Patente: string;
   Modelo?: string;
   Estado: EstadoColectivo;
-  Kilometraje?: number;
+  Kilometraje?: number | null;
+  VtoVTV?: string | null; // ISO date string, puede ser null
 };

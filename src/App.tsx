@@ -4,10 +4,8 @@ import ConfiguracionUsuarios from './Usuarios/ConfiguracionUsuarios';
 import Sidebar from './Layout/Sidebar';
 import Login from './Usuarios/Login';
 import { useState, useEffect } from 'react';
-
-// import eliminado, ahora se usa AceiteTabs
-
 import AceiteTabs from './Aceite/AceiteTabs';
+import ColectivosTabs from './Colectivos/ColectivosTabs';
 // type TabKey = 'ingreso' | 'rotacion' | 'stock' | 'historial';
 
 
@@ -18,7 +16,7 @@ function App() {
   // const [tab, setTab] = useState<TabKey>('ingreso');
   // const [aceiteTab, setAceiteTab] = useState<AceiteTabKey>('listado');
   const [showConfiguracion, setShowConfiguracion] = useState(false);
-  const [mainSection, setMainSection] = useState<'gomeria' | 'aceite'>('gomeria');
+  const [mainSection, setMainSection] = useState<'gomeria' | 'aceite' | 'colectivos'>('gomeria');
 
   // Relación entre opción y tabKey
   // const tabMap: Record<string, TabKey> = {
@@ -106,6 +104,8 @@ function App() {
           <GomeriaTabs />
         ) : mainSection === 'aceite' ? (
           <AceiteTabs />
+        ) : mainSection === 'colectivos' ? (
+          <ColectivosTabs />
         ) : null}
       </main>
     </div>
