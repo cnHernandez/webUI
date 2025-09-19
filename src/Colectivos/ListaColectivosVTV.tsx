@@ -4,6 +4,7 @@ import { registrarVtv } from '../serviceColectivo/registrarVtv';
 import type { Colectivo } from '../models/Colectivo';
 import FormularioEditarVtv from './FormularioEditarVtv';
 import { actualizarVtoVtvColectivo } from '../serviceColectivo/actualizarVtoVtvColectivo';
+import { eliminarColectivo } from '../serviceColectivo/eliminarColectivo';
 
 export default function ListaColectivosVTV() {
   const [colectivos, setColectivos] = useState<Colectivo[]>([]);
@@ -15,6 +16,8 @@ export default function ListaColectivosVTV() {
   const [enviando, setEnviando] = useState(false);
   const [exito, setExito] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [modalBaja, setModalBaja] = useState<Colectivo | null>(null);
+  const [bajaLoading, setBajaLoading] = useState(false);
 
   const recargar = () => listarColectivos().then(setColectivos);
 
@@ -51,7 +54,7 @@ export default function ListaColectivosVTV() {
     setEnviando(true);
     setError(null);
     try {
-  await registrarVtv(modal.nro, modal.id, fecha);
+      await registrarVtv(modal.nro, modal.id, fecha);
       setExito(true);
       setTimeout(() => {
         cerrarModal();
@@ -144,6 +147,12 @@ export default function ListaColectivosVTV() {
                       >
                         Registrar VTV
                       </button>
+                      <button
+                        className="bg-red-600 text-white px-3 py-1 rounded hover:bg-red-700 text-sm"
+                        onClick={() => setModalBaja(c)}
+                      >
+                        Dar de baja
+                      </button>
                     </td>
                   </tr>
                 );
@@ -187,6 +196,37 @@ export default function ListaColectivosVTV() {
             recargar();
           }}
         />
+      )}
+      {/* Modal para dar de baja colectivo */}
+      {modalBaja && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-sm w-full text-center">
+            <h3 className="text-lg font-bold mb-2 text-red-700">Confirmar baja de colectivo</h3>
+            <p className="mb-4 text-gray-700">¿Está seguro que desea dar de baja el colectivo <span className="font-semibold">{modalBaja.NroColectivo}</span>? Esta acción no se puede deshacer.</p>
+            <div className="flex justify-center gap-4">
+              <button
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700"
+                onClick={async () => {
+                  setBajaLoading(true);
+                  const ok = await eliminarColectivo(modalBaja.IdColectivo);
+                  setBajaLoading(false);
+                  setModalBaja(null);
+                  if (ok) recargar();
+                }}
+                disabled={bajaLoading}
+              >
+                Confirmar Baja
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400"
+                onClick={() => setModalBaja(null)}
+                disabled={bajaLoading}
+              >
+                Cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
