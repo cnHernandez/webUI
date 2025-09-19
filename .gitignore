@@ -1,3 +1,5 @@
+# Evitar exponer la clave API
+src/utils/apiService.ts
 # Entornos locales
 .env
 .env.local

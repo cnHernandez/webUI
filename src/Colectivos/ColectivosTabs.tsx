@@ -2,8 +2,9 @@
 import { useState } from 'react';
 import ListaColectivosVTV from './ListaColectivosVTV';
 import HistorialVtvTab from './HistorialVtvTab';
+import FormularioColectivo from './FormularioColectivo';
 
-type TabKey = 'listado' | 'historial';
+type TabKey = 'listado' | 'historial' | 'ingreso';
 
 export default function ColectivosTabs() {
   const [tab, setTab] = useState<TabKey>('listado');
@@ -18,6 +19,10 @@ export default function ColectivosTabs() {
           className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'historial' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
           onClick={() => setTab('historial')}
         >Historial VTV</button>
+        <button
+          className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'ingreso' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
+          onClick={() => setTab('ingreso')}
+        >Ingreso</button>
       </div>
       {tab === 'listado' && (
         <div className="py-8">
@@ -27,6 +32,11 @@ export default function ColectivosTabs() {
       {tab === 'historial' && (
         <div className="py-8">
           <HistorialVtvTab />
+        </div>
+      )}
+      {tab === 'ingreso' && (
+        <div className="py-8">
+          <FormularioColectivo />
         </div>
       )}
     </div>
