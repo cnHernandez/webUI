@@ -10,8 +10,9 @@ interface ListaColectivosProps {
 }
 
 const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) => {
-	const [colectivos, setColectivos] = useState<Colectivo[]>([]);
-	const [ultimoCambio, setUltimoCambio] = useState<{ [id: number]: number }>({});
+		const [colectivos, setColectivos] = useState<Colectivo[]>([]);
+		// Guardar el último cambio como objeto { kilometros, fecha }
+		const [ultimoCambio, setUltimoCambio] = useState<Record<number, { kilometros: number; fecha: string }>>({});
 	const [modal, setModal] = useState<null | { colectivoId: number; kilometros: number }>(null);
 	const [form, setForm] = useState({
 		cambioAceite: true,
@@ -36,67 +37,86 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 		setError(null);
 		setExito(false);
 	};
-	const cerrarModal = () => setModal(null);
+			const recargarDatos = async () => {
+				const data = await listarColectivos();
+				setColectivos(data);
+				const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
+				await Promise.all(
+					data.map(async (c: Colectivo) => {
+						try {
+							const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
+							if (Array.isArray(historial) && historial.length > 0) {
+								// Buscar el registro con mayor kilometraje (último cambio real)
+								const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
+								cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
+							}
+						} catch {}
+					})
+				);
+				setUltimoCambio(cambios);
+			};
+		const cerrarModal = () => setModal(null);
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, type, checked, value } = e.target;
 		setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
 	};
-	const handleSubmit = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!modal) return;
-		setEnviando(true);
-		setError(null);
-		try {
-			await registrarCambioAceite({
-				ColectivoId: modal.colectivoId,
-				Fecha: form.fecha,
-				Kilometros: modal.kilometros,
-				FiltrosCambiados: form.cambioFiltros,
-			});
-			setExito(true);
-			setTimeout(() => {
-				cerrarModal();
-				window.location.reload(); // Refrescar lista
-			}, 1200);
-		} catch (err: any) {
-			setError(err.message || 'Error al registrar el cambio');
-		} finally {
-			setEnviando(false);
-		}
-	};
+		const handleSubmit = async (e: React.FormEvent) => {
+			e.preventDefault();
+			if (!modal) return;
+			setEnviando(true);
+			setError(null);
+			try {
+				await registrarCambioAceite({
+					ColectivoId: modal.colectivoId,
+					Fecha: form.fecha,
+					Kilometros: modal.kilometros,
+					FiltrosCambiados: form.cambioFiltros,
+				});
+				setExito(true);
+				setTimeout(async () => {
+					cerrarModal();
+					await recargarDatos();
+				}, 1200);
+			} catch (err: any) {
+				setError(err.message || 'Error al registrar el cambio');
+			} finally {
+				setEnviando(false);
+			}
+		};
 
-	useEffect(() => {
-		listarColectivos().then(async (data) => {
-			setColectivos(data);
-			// Para cada colectivo, obtener el último cambio de aceite
-			const cambios: { [id: number]: number } = {};
-			await Promise.all(
-				data.map(async (c: Colectivo) => {
-					try {
-						const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
-						if (Array.isArray(historial) && historial.length > 0) {
-							cambios[c.IdColectivo] = historial[0].Kilometros;
-						}
-					} catch {
-						// Nada
-					}
-				})
-			);
-			setUltimoCambio(cambios);
+			useEffect(() => {
+				listarColectivos().then(async (data) => {
+					setColectivos(data);
+					// Para cada colectivo, obtener el historial completo y guardar el último cambio (mayor kilometraje)
+					const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
+					await Promise.all(
+						data.map(async (c: Colectivo) => {
+							try {
+								const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
+								if (Array.isArray(historial) && historial.length > 0) {
+									const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
+									cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
+								}
+							} catch {}
+						})
+					);
+					setUltimoCambio(cambios);
+				});
+			}, []);
+
+		// Filtro de colectivos
+		let colectivosFiltrados = colectivos.filter((c) => {
+			if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
+			if (filtroProximos) {
+				const cambio = ultimoCambio[c.IdColectivo];
+				const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
+				const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+				const kmDesdeCambio: number = kmActual - kmUltimo;
+				if (kmDesdeCambio < 14000) return false;
+			}
+			return true;
 		});
-	}, []);
-
-	// Filtro de colectivos
-	const colectivosFiltrados = colectivos.filter((c) => {
-		if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
-		if (filtroProximos) {
-			const kmUltimo = ultimoCambio[c.IdColectivo] ?? 0;
-			const kmActual = c.Kilometraje ?? 0;
-			const kmDesdeCambio = kmActual - kmUltimo;
-			if (kmDesdeCambio <= 14000) return false;
-		}
-		return true;
-	});
+			// No limitar, solo mostrar el scroll
 
 	return (
 		<div className="w-full bg-blue-100 py-4">
@@ -131,8 +151,8 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 								<span className="text-xs text-gray-500 mt-1">&gt; 14000 km</span>
 							</div>
 						</div>
-						{/* Scroll solo a la tabla, altura menor para margen igual al sidebar */}
-						<div className="overflow-x-auto max-h-[40vh] overflow-y-auto rounded border border-gray-200">
+						{/* Scroll solo a la tabla, altura para mostrar 10 filas aprox. */}
+						<div className="overflow-x-auto max-h-[450px] overflow-y-auto rounded border border-gray-200">
 							<table className="w-full border-collapse text-black">
 								<thead className="sticky top-0 bg-white z-10">
 									<tr>
@@ -146,24 +166,34 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 								</thead>
 								<tbody>
 									{colectivosFiltrados.map((c) => {
-										const kmUltimo = ultimoCambio[c.IdColectivo] ?? 0;
-										const kmActual = c.Kilometraje ?? 0;
-										const kmDesdeCambio = kmActual - kmUltimo;
-										let rowClass = '';
-										if (kmDesdeCambio >= 15000) {
-											rowClass = 'bg-red-300';
-										} else if (kmDesdeCambio > 14000) {
-											rowClass = 'bg-yellow-100';
-										} else {
-											rowClass = 'bg-green-100';
-										}
+																				const cambio = ultimoCambio[c.IdColectivo];
+																				  const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
+																				  const fechaUltimo: string = typeof cambio?.fecha === 'string' ? cambio.fecha : '';
+																				  const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+																				  const kmDesdeCambio: number = kmActual - kmUltimo;
+																				let rowClass = '';
+																				// Colores:
+																				// Rojo: >15000 km
+																				// Amarillo: >=14000 km y <=15000 km
+																				// Verde: desde el último cambio hasta <14000 km (incluye ok y normal)
+																				const hoy = new Date().toISOString().slice(0, 10);
+																				const esCambioHoy = fechaUltimo.slice(0, 10) === hoy;
+																				if (kmUltimo === kmActual && esCambioHoy) {
+																					rowClass = 'bg-green-500';
+																				} else if (kmDesdeCambio > 15000) {
+																					rowClass = 'bg-red-500';
+																				} else if (kmDesdeCambio >= 14000) {
+																					rowClass = 'bg-yellow-500';
+																				} else {
+																					rowClass = 'bg-green-500';
+																				}
 										return (
 											<tr key={c.IdColectivo} className={rowClass}>
 												<td className="border border-gray-300 p-2 text-center">{c.NroColectivo}</td>
 												<td className="border border-gray-300 p-2 text-center">{c.Patente}</td>
 												<td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
 												<td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
-												<td className="border border-gray-300 p-2 text-center">{kmUltimo}</td>
+												  <td className="border border-gray-300 p-2 text-center">{kmUltimo}</td>
 												<td className="border border-gray-300 p-2 text-center">
 													<button
 														className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
@@ -185,8 +215,8 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 
 			{/* Modal de cambio de aceite */}
 			{modal && (
-				<div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
-					<div className="bg-white rounded-lg shadow-lg p-8 min-w-[320px] max-w-[90vw] relative">
+				<div className="fixed inset-0 bg-white bg-opacity-10 flex items-center justify-center z-50 transition-all">
+					<div className="bg-white rounded-lg shadow-lg p-8 min-w-[320px] max-w-[90vw] relative border">
 						<button className="absolute top-2 right-2 text-gray-500 hover:text-gray-800" onClick={cerrarModal}>&times;</button>
 						<h3 className="text-lg font-bold mb-4">Registrar cambio de aceite</h3>
 						<form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -201,14 +231,18 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 							</div>
 							<div>
 								<label className="font-medium">Fecha de cambio</label>
-								<input type="date" name="fecha" value={form.fecha} onChange={handleFormChange} className="ml-2 border rounded px-2 py-1" required />
+								<input type="date" name="fecha" value={form.fecha.slice(0,10)} onChange={handleFormChange} className="ml-2 border rounded px-2 py-1" required />
 							</div>
 							<div>
 								<label className="font-medium">Kilometraje actual</label>
 								<input type="number" value={modal.kilometros} readOnly className="ml-2 border rounded px-2 py-1 bg-gray-100" />
 							</div>
 							{error && <div className="text-red-600 text-sm">{error}</div>}
-							{exito && <div className="text-green-600 text-sm">¡Cambio registrado!</div>}
+							{exito && (
+								<div className="mt-2 p-3 bg-green-100 border border-green-400 rounded-lg text-green-800 text-center font-semibold shadow transition-all">
+									¡Cambio registrado!
+								</div>
+							)}
 							<button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700" disabled={enviando}>
 								{enviando ? 'Enviando...' : 'Registrar'}
 							</button>

@@ -63,26 +63,26 @@ export default function HistorialCambioAceiteTab() {
 									</div>
 									{loading && <div className="p-4">Cargando historial...</div>}
 									{error && <div className="p-4 text-red-600">{error}</div>}
-									{historial.length > 0 && (
-											<table className="w-full border-collapse text-black mt-6">
+										{historial.length > 0 && (
+												<table className="w-full border-collapse text-black mt-6">
 													<thead>
-															<tr>
-																	<th className="border border-gray-300 p-2">Fecha</th>
-																	<th className="border border-gray-300 p-2">Kilometros</th>
-																	<th className="border border-gray-300 p-2">Filtros cambiados</th>
-															</tr>
+														<tr>
+															<th className="border border-gray-300 p-2">Fecha</th>
+															<th className="border border-gray-300 p-2">Kilometros</th>
+															<th className="border border-gray-300 p-2">Filtros cambiados</th>
+														</tr>
 													</thead>
 													<tbody>
-															{historial.map((h, i) => (
-																	<tr key={i}>
-																			<td className="border border-gray-300 p-2 text-center">{h.Fecha ? new Date(h.Fecha).toLocaleString() : '-'}</td>
-																			<td className="border border-gray-300 p-2 text-center">{h.Kilometros}</td>
-																			<td className="border border-gray-300 p-2 text-center">{h.FiltrosCambiados ? 'Sí' : 'No'}</td>
-																	</tr>
-															))}
+														{historial.map((h, i) => (
+															<tr key={i}>
+																<td className="border border-gray-300 p-2 text-center">{h.fecha ? new Date(h.fecha).toISOString().slice(0,10) : '-'}</td>
+																<td className="border border-gray-300 p-2 text-center">{h.kilometros}</td>
+																<td className="border border-gray-300 p-2 text-center">{h.filtrosCambiados ? 'Sí' : 'No'}</td>
+															</tr>
+														))}
 													</tbody>
-											</table>
-									)}
+												</table>
+											)}
 									{buscado && !loading && !error && historial.length === 0 && selectedNro && (
 											<div className="p-4 text-gray-500 text-center">No hay historial para este colectivo.</div>
 									)}

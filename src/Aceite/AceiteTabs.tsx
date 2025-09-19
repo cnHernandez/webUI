@@ -8,7 +8,7 @@ export default function AceiteTabs() {
   const [tab, setTab] = useState<AceiteTabKey>('listado');
   return (
     <div className="w-full bg-white rounded-none shadow-none p-0">
-      <div className="flex gap-4 pt-4 pb-2 justify-center">
+  <div className="flex gap-4 pt-4 pb-2 justify-center items-center w-full">
         <button
           className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'listado' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
           onClick={() => setTab('listado')}
