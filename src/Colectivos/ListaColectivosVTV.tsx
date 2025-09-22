@@ -23,21 +23,22 @@ export default function ListaColectivosVTV() {
   }, []);
 
   const hoy = new Date();
-  const colectivosFiltrados = colectivos.filter(c => {
-    // Filtrar los que NO están fuera de servicio ni estado 1
-  const estadoStr = String(c.Estado);
-  if (estadoStr === 'FueraDeServicio' || estadoStr === '1') return false;
-    if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
-    if (filtroProximos) {
-      if (!c.VtoVTV) return false;
-      const vto = new Date(c.VtoVTV);
-      const dosMesesAntes = new Date(vto);
-      dosMesesAntes.setMonth(vto.getMonth() - 2);
-      // Incluir próximos a vencer y vencidos
-      return hoy >= dosMesesAntes;
-    }
-    return true;
-  });
+  const colectivosFiltrados = colectivos
+    .filter(c => {
+      // Filtrar los que NO están fuera de servicio ni estado 1
+      const estadoStr = String(c.Estado);
+      if (estadoStr === 'FueraDeServicio' || estadoStr === '1') return false;
+      if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
+      if (filtroProximos) {
+        if (!c.VtoVTV) return false;
+        const vto = new Date(c.VtoVTV);
+        const dosMesesAntes = new Date(vto);
+        dosMesesAntes.setMonth(vto.getMonth() - 2);
+        // Incluir próximos a vencer y vencidos
+        return hoy >= dosMesesAntes;
+      }
+      return true;
+    });
 
   const abrirModal = (id: number, nro: string) => {
     setModal({ id, nro });

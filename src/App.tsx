@@ -16,7 +16,7 @@ function App() {
   // const [tab, setTab] = useState<TabKey>('ingreso');
   // const [aceiteTab, setAceiteTab] = useState<AceiteTabKey>('listado');
   const [showConfiguracion, setShowConfiguracion] = useState(false);
-  const [mainSection, setMainSection] = useState<'gomeria' | 'aceite' | 'colectivos'>('gomeria');
+  const [mainSection, setMainSection] = useState<'gomeria' | 'aceite' | 'colectivos VTV'>('gomeria');
 
   // Relación entre opción y tabKey
   // const tabMap: Record<string, TabKey> = {
@@ -104,7 +104,7 @@ function App() {
           <GomeriaTabs />
         ) : mainSection === 'aceite' ? (
           <AceiteTabs />
-        ) : mainSection === 'colectivos' ? (
+        ) : mainSection === 'colectivos VTV' ? (
           <ColectivosTabs />
         ) : null}
       </main>

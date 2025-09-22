@@ -105,17 +105,20 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 			}, []);
 
 		// Filtro de colectivos
-		let colectivosFiltrados = colectivos.filter((c) => {
-			if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
-			if (filtroProximos) {
-				const cambio = ultimoCambio[c.IdColectivo];
-				const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
-				const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-				const kmDesdeCambio: number = kmActual - kmUltimo;
-				if (kmDesdeCambio < 14000) return false;
-			}
-			return true;
-		});
+		let colectivosFiltrados = colectivos
+			.filter((c) => {
+				if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
+				if (filtroProximos) {
+					const cambio = ultimoCambio[c.IdColectivo];
+					const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
+					const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+					const kmDesdeCambio: number = kmActual - kmUltimo;
+					if (kmDesdeCambio < 14000) return false;
+				}
+				return true;
+			})
+			// Ordenar de mayor a menor kilometraje
+			.sort((a, b) => (b.Kilometraje ?? 0) - (a.Kilometraje ?? 0));
 			// No limitar, solo mostrar el scroll
 
 	return (
