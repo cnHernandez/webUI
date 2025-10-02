@@ -12,6 +12,7 @@ interface ListaColectivosProps {
 const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) => {
 	const [cargando, setCargando] = useState(true);
 		const [colectivos, setColectivos] = useState<Colectivo[]>([]);
+		const [cargandoIndividual, setCargandoIndividual] = useState<Record<number, boolean>>({});
 		// Guardar el último cambio como objeto { kilometros, fecha }
 		const [ultimoCambio, setUltimoCambio] = useState<Record<number, { kilometros: number; fecha: string }>>({});
 	const [modal, setModal] = useState<null | { colectivoId: number; kilometros: number }>(null);
@@ -42,20 +43,19 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 					setCargando(true);
 					const data = await listarColectivos();
 					setColectivos(data);
-					const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
-					await Promise.all(
-						data.map(async (c: Colectivo) => {
-							try {
-								const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
-								if (Array.isArray(historial) && historial.length > 0) {
-									const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
-									cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
-								}
-							} catch {}
-						})
-					);
-					setUltimoCambio(cambios);
 					setCargando(false);
+					// Carga progresiva de historial por colectivo
+					data.forEach(async (c: Colectivo) => {
+						setCargandoIndividual(prev => ({ ...prev, [c.IdColectivo]: true }));
+						try {
+							const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
+							if (Array.isArray(historial) && historial.length > 0) {
+								const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
+								setUltimoCambio(prev => ({ ...prev, [c.IdColectivo]: { kilometros: ultimo.kilometros, fecha: ultimo.fecha } }));
+							}
+						} catch {}
+						setCargandoIndividual(prev => ({ ...prev, [c.IdColectivo]: false }));
+					});
 			};
 		const cerrarModal = () => setModal(null);
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,7 +191,16 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 															<td className="border border-gray-300 p-2 text-center">{c.Patente}</td>
 															<td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
 															<td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
-															<td className="border border-gray-300 p-2 text-center">{kmUltimo}</td>
+															<td className="border border-gray-300 p-2 text-center">
+																{cargandoIndividual[c.IdColectivo] ? (
+																	<div className="flex items-center justify-center">
+																		<div className="animate-spin rounded-full h-6 w-6 border-t-2 border-blue-500 border-solid mr-2"></div>
+																		<span className="text-xs text-blue-700">Cargando...</span>
+																	</div>
+																) : (
+																	kmUltimo
+																)}
+															</td>
 															<td className="border border-gray-300 p-2 text-center">
 																<button
 																	className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
