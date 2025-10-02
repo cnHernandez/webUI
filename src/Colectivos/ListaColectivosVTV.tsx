@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { registrarVtv } from '../serviceColectivo/registrarVtv';
 import type { Colectivo } from '../models/Colectivo';
@@ -16,6 +16,7 @@ export default function ListaColectivosVTV() {
   const [exito, setExito] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+
   const recargar = () => listarColectivos().then(setColectivos);
 
   useEffect(() => {
@@ -23,9 +24,10 @@ export default function ListaColectivosVTV() {
   }, []);
 
   const hoy = new Date();
-  const colectivosFiltrados = colectivos
-    .filter(c => {
-      // Filtrar los que NO están fuera de servicio ni estado 1
+
+  // Memoizar filtrado y ordenamiento para mejorar performance
+  const colectivosFiltrados = useMemo(() => {
+    let filtrados = colectivos.filter(c => {
       const estadoStr = String(c.Estado);
       if (estadoStr === 'FueraDeServicio' || estadoStr === '1') return false;
       if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
@@ -39,6 +41,16 @@ export default function ListaColectivosVTV() {
       }
       return true;
     });
+    // Si filtroProximos, ordenar por VtoVTV ascendente
+    if (filtroProximos) {
+      filtrados = filtrados.slice().sort((a, b) => {
+        if (!a.VtoVTV) return 1;
+        if (!b.VtoVTV) return -1;
+        return new Date(a.VtoVTV).getTime() - new Date(b.VtoVTV).getTime();
+      });
+    }
+    return filtrados;
+  }, [colectivos, filtroNro, filtroProximos]);
 
   const abrirModal = (id: number, nro: string) => {
     setModal({ id, nro });
@@ -110,20 +122,22 @@ export default function ListaColectivosVTV() {
               </tr>
             </thead>
             <tbody>
-              {colectivosFiltrados.map((c) => {
+              {colectivosFiltrados.map((c: Colectivo) => {
                 let rowClass = '';
                 let vtoDate: Date | null = null;
                 if (c.VtoVTV) {
                   vtoDate = new Date(c.VtoVTV);
-                  const hoy = new Date();
-                  const unMesAntes = new Date(vtoDate);
-                  unMesAntes.setMonth(vtoDate.getMonth() - 1);
-                  if (vtoDate <= hoy) {
+                  // Si la fecha de vencimiento es menor o igual a hoy, está vencido (rojo)
+                  if (vtoDate.getTime() <= hoy.getTime()) {
                     rowClass = 'bg-red-500';
-                  } else if (hoy >= unMesAntes && hoy < vtoDate) {
-                    rowClass = 'bg-yellow-500';
                   } else {
-                    rowClass = 'bg-green-500';
+                    const unMesAntes = new Date(vtoDate);
+                    unMesAntes.setMonth(vtoDate.getMonth() - 1);
+                    if (hoy >= unMesAntes && hoy < vtoDate) {
+                      rowClass = 'bg-yellow-500';
+                    } else {
+                      rowClass = 'bg-green-500';
+                    }
                   }
                 } else {
                   rowClass = 'bg-green-500';

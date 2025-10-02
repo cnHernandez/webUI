@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import HistorialCambioAceiteTab from './HistorialCambioAceiteTab';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { obtenerHistorialCambioAceite } from '../serviceCambioAceite/obtenerHistorialCambioAceite';
@@ -10,6 +10,7 @@ interface ListaColectivosProps {
 }
 
 const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) => {
+	const [cargando, setCargando] = useState(true);
 		const [colectivos, setColectivos] = useState<Colectivo[]>([]);
 		// Guardar el último cambio como objeto { kilometros, fecha }
 		const [ultimoCambio, setUltimoCambio] = useState<Record<number, { kilometros: number; fecha: string }>>({});
@@ -38,22 +39,23 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 		setExito(false);
 	};
 			const recargarDatos = async () => {
-				const data = await listarColectivos();
-				setColectivos(data);
-				const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
-				await Promise.all(
-					data.map(async (c: Colectivo) => {
-						try {
-							const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
-							if (Array.isArray(historial) && historial.length > 0) {
-								// Buscar el registro con mayor kilometraje (último cambio real)
-								const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
-								cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
-							}
-						} catch {}
-					})
-				);
-				setUltimoCambio(cambios);
+					setCargando(true);
+					const data = await listarColectivos();
+					setColectivos(data);
+					const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
+					await Promise.all(
+						data.map(async (c: Colectivo) => {
+							try {
+								const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
+								if (Array.isArray(historial) && historial.length > 0) {
+									const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
+									cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
+								}
+							} catch {}
+						})
+					);
+					setUltimoCambio(cambios);
+					setCargando(false);
 			};
 		const cerrarModal = () => setModal(null);
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -85,134 +87,130 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 		};
 
 			useEffect(() => {
-				listarColectivos().then(async (data) => {
-					setColectivos(data);
-					// Para cada colectivo, obtener el historial completo y guardar el último cambio (mayor kilometraje)
-					const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
-					await Promise.all(
-						data.map(async (c: Colectivo) => {
-							try {
-								const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
-								if (Array.isArray(historial) && historial.length > 0) {
-									const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
-									cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
-								}
-							} catch {}
-						})
-					);
-					setUltimoCambio(cambios);
-				});
+					recargarDatos();
 			}, []);
 
-		// Filtro de colectivos
-		let colectivosFiltrados = colectivos
-			.filter((c) => {
-				if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
-				if (filtroProximos) {
-					const cambio = ultimoCambio[c.IdColectivo];
-					const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
-					const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-					const kmDesdeCambio: number = kmActual - kmUltimo;
-					if (kmDesdeCambio < 14000) return false;
-				}
-				return true;
-			})
-			// Ordenar de mayor a menor kilometraje
-			.sort((a, b) => (b.Kilometraje ?? 0) - (a.Kilometraje ?? 0));
-			// No limitar, solo mostrar el scroll
+			// Filtro y ordenamiento memoizado para evitar parpadeo y mejorar performance
+			const colectivosFiltrados = useMemo(() => {
+				return colectivos
+					.filter((c) => {
+						if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
+						if (filtroProximos) {
+							const cambio = ultimoCambio[c.IdColectivo];
+							const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
+							const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+							const kmDesdeCambio: number = kmActual - kmUltimo;
+							if (kmDesdeCambio < 14000) return false;
+						}
+						return true;
+					})
+					// Ordenar de mayor a menor kilometraje
+					.sort((a, b) => (b.Kilometraje ?? 0) - (a.Kilometraje ?? 0));
+			}, [colectivos, filtroNro, filtroProximos, ultimoCambio]);
 
 	return (
-		<div className="w-full bg-blue-100 py-4">
-			<div className="max-w-4xl h-screen mx-auto p-8 bg-white rounded-xl shadow-lg overflow-visible">
-				{/* Las tabs ahora se controlan desde App.tsx */}
-				{tab === 'listado' && (
-					<div>
-						<h2 className="text-xl font-bold mb-4 text-center">Listado de Colectivos</h2>
-						{/* Filtros estilo stockCubierta */}
-						<div className="flex flex-row justify-center gap-16 mb-6 items-center">
-							{/* Filtro 1: Nro Colectivo */}
-							<div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
-								<label className="font-medium mb-1">Nro Colectivo</label>
-								<input
-									type="text"
-									value={filtroNro}
-									onChange={e => setFiltroNro(e.target.value)}
-									placeholder="Filtrar por colectivo..."
-									className="border rounded px-2 py-1 w-full"
-								/>
-							</div>
-							{/* Filtro 2: Próximos a cambio */}
-							<div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
-								<label className="flex items-center gap-2">
-									<input
-										type="checkbox"
-										checked={filtroProximos}
-										onChange={e => setFiltroProximos(e.target.checked)}
-									/>
-									<span className="font-medium">Próximos a cambio</span>
-								</label>
-								<span className="text-xs text-gray-500 mt-1">&gt; 14000 km</span>
-							</div>
+			<div className="w-full bg-blue-100 py-4">
+				<div className="max-w-4xl h-screen mx-auto p-8 bg-white rounded-xl shadow-lg overflow-visible">
+					{/* Loader visual mientras se cargan los datos */}
+					{cargando ? (
+						<div className="flex flex-col items-center justify-center h-[400px]">
+							<div className="animate-spin rounded-full h-16 w-16 border-t-4 border-blue-500 border-solid mb-4"></div>
+							<span className="text-blue-700 font-semibold text-lg">Cargando datos...</span>
 						</div>
-						{/* Scroll solo a la tabla, altura para mostrar 10 filas aprox. */}
-						<div className="overflow-x-auto max-h-[450px] overflow-y-auto rounded border border-gray-200">
-							<table className="w-full border-collapse text-black">
-								<thead className="sticky top-0 bg-white z-10">
-									<tr>
-										<th className="border border-gray-300 p-2 text-center">Nro Colectivo</th>
-										<th className="border border-gray-300 p-2 text-center">Patente</th>
-										<th className="border border-gray-300 p-2 text-center">Modelo</th>
-										<th className="border border-gray-300 p-2 text-center">Kilometraje</th>
-										<th className="border border-gray-300 p-2 text-center">Km Último Cambio</th>
-										<th className="border border-gray-300 p-2 text-center">Acciones</th>
-									</tr>
-								</thead>
-								<tbody>
-									{colectivosFiltrados.map((c) => {
-																				const cambio = ultimoCambio[c.IdColectivo];
-																				  const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
-																				  const fechaUltimo: string = typeof cambio?.fecha === 'string' ? cambio.fecha : '';
-																				  const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-																				  const kmDesdeCambio: number = kmActual - kmUltimo;
-																				let rowClass = '';
-																				// Colores:
-																				// Rojo: >15000 km
-																				// Amarillo: >=14000 km y <=15000 km
-																				// Verde: desde el último cambio hasta <14000 km (incluye ok y normal)
-																				const hoy = new Date().toISOString().slice(0, 10);
-																				const esCambioHoy = fechaUltimo.slice(0, 10) === hoy;
-																				if (kmUltimo === kmActual && esCambioHoy) {
-																					rowClass = 'bg-green-500';
-																				} else if (kmDesdeCambio > 15000) {
-																					rowClass = 'bg-red-500';
-																				} else if (kmDesdeCambio >= 14000) {
-																					rowClass = 'bg-yellow-500';
-																				} else {
-																					rowClass = 'bg-green-500';
-																				}
-										return (
-											<tr key={c.IdColectivo} className={rowClass}>
-												<td className="border border-gray-300 p-2 text-center">{c.NroColectivo}</td>
-												<td className="border border-gray-300 p-2 text-center">{c.Patente}</td>
-												<td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
-												<td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
-												  <td className="border border-gray-300 p-2 text-center">{kmUltimo}</td>
-												<td className="border border-gray-300 p-2 text-center">
-													<button
-														className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
-														onClick={() => abrirModal(c.IdColectivo, c.Kilometraje ?? 0)}
-													>
-														Realizar cambio
-													</button>
-												</td>
-											</tr>
-										);
-									})}
-								</tbody>
-							</table>
-						</div>
-					</div>
-				)}
+					) : (
+						<>
+							{/* Las tabs ahora se controlan desde App.tsx */}
+							{tab === 'listado' && (
+								<div>
+									<h2 className="text-xl font-bold mb-4 text-center">Listado de Colectivos</h2>
+									{/* Filtros estilo stockCubierta */}
+									<div className="flex flex-row justify-center gap-16 mb-6 items-center">
+										{/* Filtro 1: Nro Colectivo */}
+										<div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+											<label className="font-medium mb-1">Nro Colectivo</label>
+											<input
+												type="text"
+												value={filtroNro}
+												onChange={e => setFiltroNro(e.target.value)}
+												placeholder="Filtrar por colectivo..."
+												className="border rounded px-2 py-1 w-full"
+											/>
+										</div>
+										{/* Filtro 2: Próximos a cambio */}
+										<div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
+											<label className="flex items-center gap-2">
+												<input
+													type="checkbox"
+													checked={filtroProximos}
+													onChange={e => setFiltroProximos(e.target.checked)}
+												/>
+												<span className="font-medium">Próximos a cambio</span>
+											</label>
+											<span className="text-xs text-gray-500 mt-1">&gt; 14000 km</span>
+										</div>
+									</div>
+									{/* Scroll solo a la tabla, altura para mostrar 10 filas aprox. */}
+									<div className="overflow-x-auto max-h-[450px] overflow-y-auto rounded border border-gray-200">
+										<table className="w-full border-collapse text-black">
+											<thead className="sticky top-0 bg-white z-10">
+												<tr>
+													<th className="border border-gray-300 p-2 text-center">Nro Colectivo</th>
+													<th className="border border-gray-300 p-2 text-center">Patente</th>
+													<th className="border border-gray-300 p-2 text-center">Modelo</th>
+													<th className="border border-gray-300 p-2 text-center">Kilometraje</th>
+													<th className="border border-gray-300 p-2 text-center">Km Último Cambio</th>
+													<th className="border border-gray-300 p-2 text-center">Acciones</th>
+												</tr>
+											</thead>
+											<tbody>
+												{colectivosFiltrados.map((c: Colectivo) => {
+													const cambio = ultimoCambio[c.IdColectivo];
+													const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
+													const fechaUltimo: string = typeof cambio?.fecha === 'string' ? cambio.fecha : '';
+													const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+													const kmDesdeCambio: number = kmActual - kmUltimo;
+													let rowClass = '';
+													// Colores:
+													// Rojo: >15000 km
+													// Amarillo: >=14000 km y <=15000 km
+													// Verde: desde el último cambio hasta <14000 km (incluye ok y normal)
+													const hoy = new Date().toISOString().slice(0, 10);
+													const esCambioHoy = fechaUltimo.slice(0, 10) === hoy;
+													if (kmUltimo === kmActual && esCambioHoy) {
+														rowClass = 'bg-green-500';
+													} else if (kmDesdeCambio > 15000) {
+														rowClass = 'bg-red-500';
+													} else if (kmDesdeCambio >= 14000) {
+														rowClass = 'bg-yellow-500';
+													} else {
+														rowClass = 'bg-green-500';
+													}
+													return (
+														<tr key={c.IdColectivo} className={rowClass}>
+															<td className="border border-gray-300 p-2 text-center">{c.NroColectivo}</td>
+															<td className="border border-gray-300 p-2 text-center">{c.Patente}</td>
+															<td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
+															<td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
+															<td className="border border-gray-300 p-2 text-center">{kmUltimo}</td>
+															<td className="border border-gray-300 p-2 text-center">
+																<button
+																	className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+																	onClick={() => abrirModal(c.IdColectivo, c.Kilometraje ?? 0)}
+																>
+																	Realizar cambio
+																</button>
+															</td>
+														</tr>
+													);
+												})}
+											</tbody>
+										</table>
+									</div>
+								</div>
+							)}
+							{tab === 'historial' && <HistorialCambioAceiteTab />}
+						</>
+					)}
 				{tab === 'historial' && <HistorialCambioAceiteTab />}
 			</div>
 
