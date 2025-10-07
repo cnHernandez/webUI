@@ -64,6 +64,12 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 		const handleSubmit = async (e: React.FormEvent) => {
 			e.preventDefault();
 			if (!modal) return;
+			const cambio = ultimoCambio[modal.colectivoId];
+			const kmUltimo = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
+			if (modal.kilometros === kmUltimo) {
+				setError('El kilometraje actual no puede ser igual al del último cambio de aceite.');
+				return;
+			}
 			setEnviando(true);
 			setError(null);
 			try {
@@ -237,7 +243,11 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 								<label className="font-medium">Kilometraje actual</label>
 								<input type="number" value={modal.kilometros} readOnly className="ml-2 border rounded px-2 py-1 bg-gray-100" />
 							</div>
-							{error && <div className="text-red-600 text-sm">{error}</div>}
+							{error && (
+								<div className="mt-2 p-3 bg-yellow-100 border border-yellow-400 rounded-lg text-yellow-800 text-center font-semibold shadow transition-all">
+									{error}
+								</div>
+							)}
 							{exito && (
 								<div className="mt-2 p-3 bg-green-100 border border-green-400 rounded-lg text-green-800 text-center font-semibold shadow transition-all">
 									¡Cambio registrado!

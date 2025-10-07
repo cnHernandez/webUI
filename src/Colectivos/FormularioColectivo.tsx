@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { apiService } from '../utils/apiService';
+import { obtenerColectivoPorNro } from '../serviceColectivo/obtenerColectivoPorNro';
+import { crearEditarColectivo } from '../serviceColectivo/crearEditarColectivo';
 
 interface Props {
   onSuccess?: () => void;
@@ -16,28 +17,56 @@ export default function FormularioColectivo({ onSuccess }: Props) {
   const [vtoVTV, setVtoVTV] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [enviando, setEnviando] = useState(false);
+  const [editando, setEditando] = useState(false);
+  const [idColectivoEditando, setIdColectivoEditando] = useState<number|null>(null);
+
+  const handleNroBlur = async () => {
+    if (!nroColectivo) return;
+    const colectivo = await obtenerColectivoPorNro(nroColectivo);
+    if (colectivo) {
+      setPatente(colectivo.Patente || '');
+      setModelo(colectivo.Modelo || '');
+      setEstado(colectivo.Estado || 'Activo');
+      setKilometraje(colectivo.Kilometraje?.toString() || '');
+      setVtoVTV(colectivo.VtoVTV?.slice(0, 10) || '');
+      setEditando(true);
+      setIdColectivoEditando(colectivo.IdColectivo);
+      setMensaje('ℹ️ Colectivo existente, solo puede modificar el kilometraje.');
+    } else {
+      setEditando(false);
+      setIdColectivoEditando(null);
+      setPatente('');
+      setModelo('');
+      setEstado('Activo');
+      setKilometraje('');
+      setVtoVTV('');
+      setMensaje('');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setEnviando(true);
     setMensaje('');
     try {
-      const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
-      const body = {
-        nroColectivo: nroColectivo,
-        patente: patente,
-        modelo: modelo,
+      const response = await crearEditarColectivo({
+        editando,
+        idColectivoEditando,
+        nroColectivo,
+        patente,
+        modelo,
         estado: estadoMap[estado],
         kilometraje: kilometraje ? Number(kilometraje) : undefined,
         vtoVTV: vtoVTV || undefined,
-      };
-      console.log('Enviando body colectivo:', body);
-      const response = await apiService(`${apiHost}/api/colectivos`, {
-        method: 'POST',
-        body: JSON.stringify(body)
       });
-      if (!response.ok) throw new Error('Error al crear colectivo');
-      setMensaje('✅ Colectivo ingresado correctamente');
+      if (!response.ok) throw new Error(editando ? 'Error al modificar colectivo' : 'Error al crear colectivo');
+      if (editando) {
+        setMensaje('✅ Kilometraje modificado con éxito');
+      } else {
+        setMensaje('✅ Colectivo ingresado correctamente');
+      }
+      setEditando(false);
+      setIdColectivoEditando(null);
       setNroColectivo('');
       setPatente('');
       setModelo('');
@@ -46,7 +75,7 @@ export default function FormularioColectivo({ onSuccess }: Props) {
       setVtoVTV('');
       if (onSuccess) onSuccess();
     } catch (err: any) {
-      setMensaje(err.message || 'Error al crear colectivo');
+      setMensaje(err.message || (editando ? 'Error al modificar colectivo' : 'Error al crear colectivo'));
     } finally {
       setEnviando(false);
     }
@@ -60,18 +89,26 @@ export default function FormularioColectivo({ onSuccess }: Props) {
           <div className="flex gap-8">
             <div className="flex flex-col gap-4 min-w-[220px]">
               <label className="font-medium text-black block">Nro. Colectivo
-                <input type="text" value={nroColectivo} onChange={e => setNroColectivo(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" />
+                <input
+                  type="text"
+                  value={nroColectivo}
+                  onChange={e => setNroColectivo(e.target.value)}
+                  onBlur={handleNroBlur}
+                  required
+                  className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black"
+                  disabled={editando}
+                />
               </label>
               <label className="font-medium text-black block">Patente
-                <input type="text" value={patente} onChange={e => setPatente(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" />
+                <input type="text" value={patente} onChange={e => setPatente(e.target.value)} required className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" disabled={editando} />
               </label>
               <label className="font-medium text-black block">Modelo
-                <input type="text" value={modelo} onChange={e => setModelo(e.target.value)} className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" />
+                <input type="text" value={modelo} onChange={e => setModelo(e.target.value)} className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" disabled={editando} />
               </label>
             </div>
             <div className="flex flex-col gap-4 min-w-[220px]">
               <label className="font-medium text-black block">Estado
-                <select value={estado} onChange={e => setEstado(e.target.value as any)} className="border border-gray-300 rounded-md p-2 w-full mt-1">
+                <select value={estado} onChange={e => setEstado(e.target.value as any)} className="border border-gray-300 rounded-md p-2 w-full mt-1" disabled={editando}>
                   <option value="Activo">Activo</option>
                   <option value="FueraDeServicio">Fuera de Servicio</option>
                 </select>
@@ -80,7 +117,7 @@ export default function FormularioColectivo({ onSuccess }: Props) {
                 <input type="number" value={kilometraje} onChange={e => setKilometraje(e.target.value)} min="0" className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" />
               </label>
               <label className="font-medium text-black block">Vto VTV
-                <input type="date" value={vtoVTV} onChange={e => setVtoVTV(e.target.value)} className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" />
+                <input type="date" value={vtoVTV} onChange={e => setVtoVTV(e.target.value)} className="border border-gray-300 rounded-md p-2 w-full mt-1 text-black" disabled={editando} />
               </label>
             </div>
           </div>
@@ -89,7 +126,7 @@ export default function FormularioColectivo({ onSuccess }: Props) {
           </button>
         </form>
         {mensaje && (
-          <div className="mt-6 p-4 bg-green-100 border border-green-400 rounded-lg text-green-800 text-center font-semibold shadow">
+          <div className={`mt-6 p-4 ${editando ? 'bg-yellow-100 border-yellow-400 text-yellow-800' : 'bg-green-100 border-green-400 text-green-800'} border rounded-lg text-center font-semibold shadow`}>
             <span>{mensaje}</span>
           </div>
         )}
