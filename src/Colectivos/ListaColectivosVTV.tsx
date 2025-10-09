@@ -49,14 +49,13 @@ export default function ListaColectivosVTV() {
       }
       return true;
     });
-    // Si filtroProximos, ordenar por VtoVTV ascendente
-    if (filtroProximos) {
-      filtrados = filtrados.slice().sort((a, b) => {
-        if (!a.VtoVTV) return 1;
-        if (!b.VtoVTV) return -1;
-        return new Date(a.VtoVTV).getTime() - new Date(b.VtoVTV).getTime();
-      });
-    }
+    // Ordenar SIEMPRE por VtoVTV ascendente (los más próximos primero, los sin fecha al final)
+    filtrados = filtrados.slice().sort((a, b) => {
+      if (!a.VtoVTV && !b.VtoVTV) return 0;
+      if (!a.VtoVTV) return 1;
+      if (!b.VtoVTV) return -1;
+      return new Date(a.VtoVTV).getTime() - new Date(b.VtoVTV).getTime();
+    });
     return filtrados;
   }, [colectivos, filtroNro, filtroProximos]);
 
