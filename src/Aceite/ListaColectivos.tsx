@@ -1,7 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import HistorialCambioAceiteTab from './HistorialCambioAceiteTab';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
-import { obtenerHistorialCambioAceite } from '../serviceCambioAceite/obtenerHistorialCambioAceite';
 import { registrarCambioAceite } from '../serviceCambioAceite/registrarCambioAceite';
 import type { Colectivo } from '../models/Colectivo';
 
@@ -11,8 +10,7 @@ interface ListaColectivosProps {
 
 const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) => {
 	const [cargando, setCargando] = useState(true);
-	const [colectivos, setColectivos] = useState<Colectivo[]>([]);
-	const [ultimoCambio, setUltimoCambio] = useState<Record<number, { kilometros: number; fecha: string }>>({});
+	const [colectivos, setColectivos] = useState<any[]>([]);
 	const [modal, setModal] = useState<null | { colectivoId: number; kilometros: number }>(null);
 	const [form, setForm] = useState({
 		cambioAceite: true,
@@ -37,81 +35,67 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 		setError(null);
 		setExito(false);
 	};
-			const recargarDatos = async () => {
-  setCargando(true);
-  const data = await listarColectivos();
-  setColectivos(data);
-  const cambios: { [id: number]: { kilometros: number, fecha: string } } = {};
-  await Promise.all(
-    data.map(async (c: Colectivo) => {
-      try {
-        const historial = await obtenerHistorialCambioAceite(c.IdColectivo);
-        if (Array.isArray(historial) && historial.length > 0) {
-          const ultimo = historial.reduce((max, curr) => curr.kilometros > max.kilometros ? curr : max, historial[0]);
-          cambios[c.IdColectivo] = { kilometros: ultimo.kilometros, fecha: ultimo.fecha };
-        }
-      } catch {}
-    })
-  );
-  setUltimoCambio(cambios);
-  setCargando(false);
-};
+				const recargarDatos = async () => {
+					setCargando(true);
+					const data = await listarColectivos();
+					setColectivos(data);
+					setCargando(false);
+				};
 		const cerrarModal = () => setModal(null);
 	const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, type, checked, value } = e.target;
 		setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }));
 	};
-		const handleSubmit = async (e: React.FormEvent) => {
-			e.preventDefault();
-			if (!modal) return;
-			const cambio = ultimoCambio[modal.colectivoId];
-			const kmUltimo = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
-			if (modal.kilometros === kmUltimo) {
-				setError('El kilometraje actual no puede ser igual al del último cambio de aceite.');
-				return;
-			}
-			setEnviando(true);
-			setError(null);
-			try {
-				await registrarCambioAceite({
-					ColectivoId: modal.colectivoId,
-					Fecha: form.fecha,
-					Kilometros: modal.kilometros,
-					FiltrosCambiados: form.cambioFiltros,
-				});
-				setExito(true);
-				setTimeout(async () => {
-					cerrarModal();
-					await recargarDatos();
-				}, 1200);
-			} catch (err: any) {
-				setError(err.message || 'Error al registrar el cambio');
-			} finally {
-				setEnviando(false);
-			}
-		};
+			const handleSubmit = async (e: React.FormEvent) => {
+				e.preventDefault();
+				if (!modal) return;
+				const colectivo = colectivos.find(c => c.IdColectivo === modal.colectivoId);
+				const kmUltimo = typeof colectivo?.UltimoCambioAceite?.kilometros === 'number' && !isNaN(colectivo.UltimoCambioAceite.kilometros) ? colectivo.UltimoCambioAceite.kilometros : 0;
+				if (modal.kilometros === kmUltimo) {
+					setError('El kilometraje actual no puede ser igual al del último cambio de aceite.');
+					return;
+				}
+				setEnviando(true);
+				setError(null);
+				try {
+					await registrarCambioAceite({
+						ColectivoId: modal.colectivoId,
+						Fecha: form.fecha,
+						Kilometros: modal.kilometros,
+						FiltrosCambiados: form.cambioFiltros,
+					});
+					setExito(true);
+					setTimeout(async () => {
+						cerrarModal();
+						await recargarDatos();
+					}, 1200);
+				} catch (err: any) {
+					setError(err.message || 'Error al registrar el cambio');
+				} finally {
+					setEnviando(false);
+				}
+			};
 
 			useEffect(() => {
 					recargarDatos();
 			}, []);
 
 			// Filtro y ordenamiento memoizado para evitar parpadeo y mejorar performance
-			const colectivosFiltrados = useMemo(() => {
-				return colectivos
-					.filter((c) => {
-						if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
-						if (filtroProximos) {
-							const cambio = ultimoCambio[c.IdColectivo];
-							const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
-							const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-							const kmDesdeCambio: number = kmActual - kmUltimo;
-							if (kmDesdeCambio < 14000) return false;
-						}
-						return true;
-					})
-					// Ordenar de mayor a menor kilometraje
-					.sort((a, b) => (b.Kilometraje ?? 0) - (a.Kilometraje ?? 0));
-			}, [colectivos, filtroNro, filtroProximos, ultimoCambio]);
+				const colectivosFiltrados = useMemo(() => {
+					return colectivos
+						.filter((c) => {
+							if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
+							if (filtroProximos) {
+								const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
+								const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+								const kmDesdeCambio: number = kmActual - kmUltimo;
+								if (kmDesdeCambio < 14000) return false;
+							}
+							return true;
+						})
+						// Ordenar de mayor a menor kilometraje
+						.sort((a, b) => (b.Kilometraje ?? 0) - (a.Kilometraje ?? 0));
+				}, [colectivos, filtroNro, filtroProximos]);
 
 	return (
 			<div className="w-full bg-blue-100 py-4">
@@ -169,9 +153,9 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 											</thead>
 											<tbody>
 												{colectivosFiltrados.map((c: Colectivo) => {
-													const cambio = ultimoCambio[c.IdColectivo];
-													const kmUltimo: number = typeof cambio?.kilometros === 'number' && !isNaN(cambio.kilometros) ? cambio.kilometros : 0;
-													const fechaUltimo: string = typeof cambio?.fecha === 'string' ? cambio.fecha : '';
+
+													const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
+													const fechaUltimo: string = typeof c.UltimoCambioAceite?.fecha === 'string' ? c.UltimoCambioAceite.fecha : '';
 													const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
 													const kmDesdeCambio: number = kmActual - kmUltimo;
 													let rowClass = '';

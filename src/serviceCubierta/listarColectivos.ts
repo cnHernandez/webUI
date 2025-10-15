@@ -1,9 +1,9 @@
-import type { Colectivo } from '../models/Colectivo';
+
 import { apiService } from '../utils/apiService';
 
-export async function listarColectivos(): Promise<Colectivo[]> {
+export async function listarColectivos(): Promise<any[]> {
   try {
-  const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
+    const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
     const response = await apiService(`${apiHost}/api/colectivos`);
     if (response.ok) {
       const data = await response.json();
@@ -13,10 +13,10 @@ export async function listarColectivos(): Promise<Colectivo[]> {
         Patente: c.patente,
         Marca: c.marca,
         Modelo: c.modelo,
-        Año: c.año,
-        Estado: c.estado, // Si necesitas mapear el número a string, avísame
+        Estado: c.estado,
         Kilometraje: c.kilometraje,
         VtoVTV: c.vtoVTV ?? null,
+        UltimoCambioAceite: c.ultimoCambioAceite || null,
       }));
     }
     return [];

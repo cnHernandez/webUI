@@ -8,4 +8,8 @@ export type Colectivo = {
   Estado: EstadoColectivo;
   Kilometraje?: number | null;
   VtoVTV?: string | null; // ISO date string, puede ser null
+  UltimoCambioAceite?: {
+    kilometros: number;
+    fecha: string;
+  } | null;
 };
