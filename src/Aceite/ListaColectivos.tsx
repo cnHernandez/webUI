@@ -2,6 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import HistorialCambioAceiteTab from './HistorialCambioAceiteTab';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { registrarCambioAceite } from '../serviceCambioAceite/registrarCambioAceite';
+import InfoUltimoProcesamiento from '../components/InfoUltimoProcesamiento';
 import type { Colectivo } from '../models/Colectivo';
 
 interface ListaColectivosProps {
@@ -112,6 +113,7 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 							{tab === 'listado' && (
 								<div>
 									<h2 className="text-xl font-bold mb-4 text-center">Listado de Colectivos</h2>
+									<InfoUltimoProcesamiento />
 									{/* Filtros estilo stockCubierta */}
 									<div className="flex flex-row justify-center gap-16 mb-6 items-center">
 										{/* Filtro 1: Nro Colectivo */}

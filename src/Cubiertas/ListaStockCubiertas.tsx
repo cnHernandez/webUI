@@ -5,6 +5,7 @@ import { traducirEstadoCubierta } from '../models/Cubierta';
 import { listarCubiertas } from '../serviceCubierta/listarCubiertas';
 import { obtenerHistorialMontajeCubierta } from '../serviceCubierta/obtenerHistorialMontajeCubierta';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
+import InfoUltimoProcesamiento from '../components/InfoUltimoProcesamiento';
 
 
 const ListaStockCubiertas: React.FC = () => {
@@ -129,6 +130,7 @@ const ListaStockCubiertas: React.FC = () => {
     <div className="w-full bg-blue-100 py-12">
       <div className="max-w-5xl mx-auto p-8 bg-white rounded-xl shadow-lg">
         <h2 className="text-xl font-bold mb-4 text-center">Stock de Cubiertas</h2>
+        <InfoUltimoProcesamiento />
         {/* Filtros */}
         <div className="flex flex-row justify-center gap-16 mb-6 items-center">
           {/* Filtro 1: Libres */}

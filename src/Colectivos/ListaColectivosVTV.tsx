@@ -1,6 +1,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import { listarColectivos } from '../serviceCubierta/listarColectivos';
 import { registrarVtv } from '../serviceColectivo/registrarVtv';
+import InfoUltimoProcesamiento from '../components/InfoUltimoProcesamiento';
 import type { Colectivo } from '../models/Colectivo';
 import FormularioEditarVtv from './FormularioEditarVtv';
 import { actualizarVtoVtvColectivo } from '../serviceColectivo/actualizarVtoVtvColectivo';
@@ -98,6 +99,7 @@ export default function ListaColectivosVTV() {
         ) : (
           <>
             <h2 className="text-xl font-bold mb-4 text-center">Listado de Colectivos</h2>
+            <InfoUltimoProcesamiento />
             <div className="flex flex-row justify-center gap-16 mb-6 items-center">
               {/* Filtro 1: Nro Colectivo */}
               <div className="bg-white rounded shadow p-3 flex flex-col items-center min-w-[180px]">
