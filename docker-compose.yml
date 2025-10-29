@@ -4,13 +4,13 @@ services:
     build:
       context: .
       args:
-        - VITE_API_URL=http://3.145.26.78:5058
+        - VITE_API_URL=${VITE_API_BASE_URL}
     ports:
       - "8080:80"
     networks:
       - webnet
     environment:
-      - VITE_API_URL=http://3.145.26.78:5058
+      - VITE_API_URL=${VITE_API_BASE_URL}
       - API_KEY=QnVydmVsYUFwaVNlY3VyaXR5IzEyMg=
 
 networks:

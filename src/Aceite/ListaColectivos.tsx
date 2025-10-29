@@ -77,23 +77,37 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 				}
 			};
 
-			useEffect(() => {
-					recargarDatos();
-			}, []);
+		useEffect(() => {
+				recargarDatos();
+		}, []);
 
-			// Filtro y ordenamiento memoizado para evitar parpadeo y mejorar performance
-				const colectivosFiltrados = useMemo(() => {
-					return colectivos
-						.filter((c) => {
-							if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
-							if (filtroProximos) {
-								const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
-								const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-								const kmDesdeCambio: number = kmActual - kmUltimo;
-								if (kmDesdeCambio < 14000) return false;
-							}
-							return true;
-						})
+		// Colectivos que requieren mantenimiento cada 10,000 km
+		const colectivosCada10mil = [3, 4, 10, 11, 13, 16, 23, 26, 27, 29, 33, 34, 36, 37, 40, 46, 47, 49, 50, 53, 56, 60, 72];
+
+		// Función para obtener los umbrales de mantenimiento según el número de colectivo
+		const obtenerUmbrales = (nroColectivo: string | number) => {
+			const nro = typeof nroColectivo === 'string' ? parseInt(nroColectivo, 10) : nroColectivo;
+			const esCada10mil = colectivosCada10mil.includes(nro);
+			return {
+				amarillo: esCada10mil ? 9000 : 14000,
+				rojo: esCada10mil ? 10000 : 15000
+			};
+		};
+
+		// Filtro y ordenamiento memoizado para evitar parpadeo y mejorar performance
+			const colectivosFiltrados = useMemo(() => {
+				return colectivos
+					.filter((c) => {
+						if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
+						if (filtroProximos) {
+							const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
+							const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
+							const kmDesdeCambio: number = kmActual - kmUltimo;
+							const umbrales = obtenerUmbrales(c.NroColectivo);
+							if (kmDesdeCambio < umbrales.amarillo) return false;
+						}
+						return true;
+					})
 						// Ordenar de mayor a menor kilometraje
 						.sort((a, b) => (b.Kilometraje ?? 0) - (a.Kilometraje ?? 0));
 				}, [colectivos, filtroNro, filtroProximos]);
@@ -137,7 +151,7 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 												/>
 												<span className="font-medium">Próximos a cambio</span>
 											</label>
-											<span className="text-xs text-gray-500 mt-1">&gt; 14000 km</span>
+											<span className="text-xs text-gray-500 mt-1">Cerca del límite de km</span>
 										</div>
 									</div>
 									{/* Scroll solo a la tabla, altura para mostrar 10 filas aprox. */}
@@ -160,18 +174,19 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 													const fechaUltimo: string = typeof c.UltimoCambioAceite?.fecha === 'string' ? c.UltimoCambioAceite.fecha : '';
 													const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
 													const kmDesdeCambio: number = kmActual - kmUltimo;
+													const umbrales = obtenerUmbrales(c.NroColectivo);
 													let rowClass = '';
-													// Colores:
-													// Rojo: >15000 km
-													// Amarillo: >=14000 km y <=15000 km
-													// Verde: desde el último cambio hasta <14000 km (incluye ok y normal)
+													// Colores dinámicos según el tipo de colectivo:
+													// Colectivos especiales (cada 10000 km): Amarillo >=9000 km, Rojo >=10000 km
+													// Colectivos normales (cada 15000 km): Amarillo >=14000 km, Rojo >=15000 km
+													// Verde: desde el último cambio hasta umbral amarillo (incluye ok y normal)
 													const hoy = new Date().toISOString().slice(0, 10);
 													const esCambioHoy = fechaUltimo.slice(0, 10) === hoy;
 													if (kmUltimo === kmActual && esCambioHoy) {
 														rowClass = 'bg-green-500';
-													} else if (kmDesdeCambio > 15000) {
+													} else if (kmDesdeCambio >= umbrales.rojo) {
 														rowClass = 'bg-red-500';
-													} else if (kmDesdeCambio >= 14000) {
+													} else if (kmDesdeCambio >= umbrales.amarillo) {
 														rowClass = 'bg-yellow-500';
 													} else {
 														rowClass = 'bg-green-500';
