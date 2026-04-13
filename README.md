@@ -1,53 +1,119 @@
-# Seguridad de la API Key
+# Sistema de Gestión de Flota de Colectivos — Frontend
 
-Para acceder a la API, es obligatorio enviar la cabecera `x-api-key` en todas las peticiones. La clave debe almacenarse en el archivo `.env` como:
+Aplicación web para la gestión integral de la flota de colectivos de la empresa. Permite llevar el control de cubiertas (gomería), cambios de aceite y vencimientos de VTV por unidad, con un sistema de autenticación por roles.
+
+---
+
+## Módulos principales
+
+### Gomería (Cubiertas)
+Gestión completa del ciclo de vida de los neumáticos:
+
+| Pestaña | Descripción |
+|---|---|
+| **Ingreso** | Alta de cubiertas nuevas al sistema con número de serie y datos técnicos |
+| **Rotación** | Registro de montaje y desmontaje de cubiertas en los colectivos |
+| **Stock** | Visualización del inventario actual de cubiertas disponibles |
+| **Historial** | Historial completo de movimientos de cada cubierta |
+
+### Aceite
+Control de cambios de aceite por colectivo:
+
+| Pestaña | Descripción |
+|---|---|
+| **Listado** | Lista de colectivos con estado del último cambio de aceite y kilometraje |
+| **Historial** | Historial de todos los cambios de aceite registrados |
+
+### Colectivos VTV
+Seguimiento de la Verificación Técnica Vehicular (VTV) por unidad:
+
+| Pestaña | Descripción |
+|---|---|
+| **Listado** | Lista de colectivos con fecha de vencimiento de VTV |
+| **Historial VTV** | Historial de inspecciones técnicas por unidad |
+| **Ingreso** | Registro de nuevos colectivos en el sistema |
+
+### Configuración de Usuarios *(solo Administrador)*
+Gestión de cuentas de usuario con dos roles disponibles:
+
+- **Administrador** — acceso completo a todos los módulos y configuración de usuarios.
+- **Gomeria** — acceso restringido a las pestañas de ingreso, rotación y stock de cubiertas.
+
+---
+
+## Stack tecnológico
+
+| Tecnología | Versión |
+|---|---|
+| React | 19 |
+| TypeScript | ~5.8 |
+| Vite | 7 |
+| Tailwind CSS | 4 |
+| React Router DOM | 7 |
+| React Icons | 5 |
+
+---
+
+## Inicio rápido
+
+### Desarrollo local
+
+```bash
+# Instalar dependencias
+npm install
+
+# Iniciar servidor de desarrollo
+npm run dev
+```
+
+Crear un archivo `.env` en la raíz con las variables necesarias:
+
+```env
+VITE_API_BASE_URL=http://localhost:PUERTO_DE_TU_API
+```
+
+### Build de producción
+
+```bash
+npm run build
+```
+
+### Docker
+
+```bash
+docker compose up --build
+```
+
+La aplicación queda disponible en `http://localhost:8080`.
+
+---
+
+## Seguridad
+
+Todas las peticiones a la API incluyen la cabecera `X-API-KEY` para autenticación.  
+La clave se define en `.env` como `VITE_API_KEY`.
+
+> **Nunca subas el archivo `.env` al repositorio.** Usa `.env.example` como plantilla para documentar las variables requeridas.
+
+---
+
+## Estructura del proyecto
 
 ```
-VITE_API_KEY=QnVydmVsYUFwaVNlY3VyaXR5IzEyMg=
+src/
+├── Aceite/          # Módulo de cambio de aceite
+├── Colectivos/      # Módulo de VTV y gestión de colectivos
+├── Cubiertas/       # Módulo de gomería (cubiertas)
+├── Layout/          # Sidebar, menú y header
+├── models/          # Tipos e interfaces TypeScript
+├── serviceCambioAceite/
+├── serviceColectivo/
+├── serviceCubierta/
+├── serviceKilometraje/
+├── serviceUsuario/
+├── Usuarios/        # Login y configuración de usuarios
+└── utils/           # Servicio HTTP con autenticación
 ```
-
-Nunca subas tu archivo `.env` a GitHub. Usa `.env.example` como plantilla para compartir la estructura de variables de entorno.
-
-El frontend utiliza la utilidad `getApiKeyHeaders` para agregar la cabecera de forma segura en cada request.
-# React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
 
 You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
