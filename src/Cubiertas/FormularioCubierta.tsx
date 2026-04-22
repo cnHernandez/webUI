@@ -222,6 +222,8 @@ export default function FormularioCubierta() {
                   <option value="CONTINENTAL" />
                   <option value="ESTELMAN" />
                   <option value="MICHELIN" />
+                  <option value="HANKOOK" />
+                  <option value="EVERGREEN" />
                 </datalist>
               </label>
               <label className="font-medium text-black block">Medida
