@@ -226,14 +226,7 @@ export default function FormularioCubierta() {
                   <option value="EVERGREEN" />
                 </datalist>
               </label>
-              <label className="font-medium text-black block">Medida
-                <input
-                  type="text"
-                  value={medida}
-                  onChange={e => setMedida(e.target.value)}
-                  className={`border border-gray-300 rounded-md p-2 w-full mt-1 text-black bg-gray-100`}
-                />
-              </label>
+            
             </div>
             {/* Columna 2 */}
             <div className="flex flex-col gap-4 min-w-[220px]">
