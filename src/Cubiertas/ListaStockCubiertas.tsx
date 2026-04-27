@@ -200,7 +200,7 @@ const ListaStockCubiertas: React.FC = () => {
             <tr>
               <th className="border border-gray-300 p-2 text-center">Nro Serie</th>
               <th className="border border-gray-300 p-2 text-center">Marca</th>
-              <th className="border border-gray-300 p-2 text-center">Medida</th>
+             
               <th className="border border-gray-300 p-2 text-center">Estado</th>
               <th className="border border-gray-300 p-2 text-center">Colectivo</th>
               <th className="border border-gray-300 p-2 text-center">Ubicación</th>
@@ -230,7 +230,7 @@ const ListaStockCubiertas: React.FC = () => {
                   onClick={() => setCubiertaPerfilSerie(c.nroSerie)}>
                   <td className="border border-gray-300 p-2 text-center">{c.nroSerie || '-'}</td>
                   <td className="border border-gray-300 p-2 text-center">{c.marca || '-'}</td>
-                  <td className="border border-gray-300 p-2 text-center">{c.medida || '-'}</td>
+                
                   <td className="border border-gray-300 p-2 text-center">{traducirEstadoCubierta(c.estadoInfo?.estado)}</td>
                   <td className="border border-gray-300 p-2 text-center">{colectivo}</td>
                   <td className="border border-gray-300 p-2 text-center">{ubicacion ? c.ubicacionDescripcion : '-'}</td>
