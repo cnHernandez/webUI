@@ -16,7 +16,7 @@ export type Colectivo = {
 	Marca: string;
 	Modelo?: string;
 	Año: number;
-	Estado: 'Activo' | 'FueraDeServicio';
+	Estado: 'Activo' | 'FueraDeServicio' | 'DarDeBaja';
 };
 
 export type UbicacionCubierta = {

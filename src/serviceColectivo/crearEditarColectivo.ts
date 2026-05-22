@@ -21,7 +21,6 @@ export async function crearEditarColectivo({
 }): Promise<Response> {
   const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   if (editando && idColectivoEditando) {
-    // PUT para modificar colectivo existente
     return apiService(`${apiHost}/api/colectivos/${idColectivoEditando}`, {
       method: 'PUT',
       body: JSON.stringify({
@@ -34,7 +33,6 @@ export async function crearEditarColectivo({
       })
     });
   } else {
-    // POST para crear nuevo colectivo
     return apiService(`${apiHost}/api/colectivos`, {
       method: 'POST',
       body: JSON.stringify({

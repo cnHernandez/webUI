@@ -4,7 +4,7 @@ import ListaColectivosVTV from './ListaColectivosVTV';
 import HistorialVtvTab from './HistorialVtvTab';
 import FormularioColectivo from './FormularioColectivo';
 
-type TabKey = 'listado' | 'historial' | 'ingreso';
+type TabKey = 'listado' | 'historial' | 'gestion';
 
 export default function ColectivosTabs() {
   const [tab, setTab] = useState<TabKey>('listado');
@@ -20,9 +20,9 @@ export default function ColectivosTabs() {
           onClick={() => setTab('historial')}
         >Historial VTV</button>
         <button
-          className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'ingreso' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
-          onClick={() => setTab('ingreso')}
-        >Ingreso</button>
+          className={`px-4 py-2 rounded-t-lg font-semibold border-none ${tab === 'gestion' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-600'}`}
+          onClick={() => setTab('gestion')}
+        >Gestión</button>
       </div>
       {tab === 'listado' && (
         <div className="py-8">
@@ -34,7 +34,7 @@ export default function ColectivosTabs() {
           <HistorialVtvTab />
         </div>
       )}
-      {tab === 'ingreso' && (
+      {tab === 'gestion' && (
         <div className="py-8">
           <FormularioColectivo />
         </div>

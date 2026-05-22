@@ -1,6 +1,18 @@
 import { apiService } from '../utils/apiService';
 import type { Colectivo } from '../models/Colectivo';
 
+function mapearEstado(estado: unknown, estadoDescripcion?: string): Colectivo['Estado'] {
+  if (estadoDescripcion === 'DarDeBaja' || estado === 2 || estado === '2') {
+    return 'DarDeBaja';
+  }
+
+  if (estadoDescripcion === 'FueraDeServicio' || estado === 1 || estado === '1') {
+    return 'FueraDeServicio';
+  }
+
+  return 'Activo';
+}
+
 export async function obtenerColectivoPorNro(nroColectivo: string): Promise<Colectivo | null> {
   const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const response = await apiService(`${apiHost}/api/colectivos/por-nro/${nroColectivo}`);
@@ -10,10 +22,21 @@ export async function obtenerColectivoPorNro(nroColectivo: string): Promise<Cole
   return {
     IdColectivo: data.idColectivo,
     NroColectivo: data.nroColectivo,
+    NumeroLiberado: data.numeroLiberado ?? null,
+    NumeroDisponibleActual: data.numeroDisponibleActual ?? null,
     Patente: data.patente,
     Modelo: data.modelo,
-    Estado: data.estado,
+    Estado: mapearEstado(data.estado, data.estadoDescripcion),
+    SinAsignacion: data.sinAsignacion === true,
     Kilometraje: data.kilometraje,
     VtoVTV: data.vtoVTV ?? null,
+    CubiertasMontadas: Array.isArray(data.cubiertasMontadas)
+      ? data.cubiertasMontadas.map((montaje: any) => ({
+          IdUbicacion: montaje.idUbicacion,
+          DescripcionUbicacion: montaje.descripcionUbicacion,
+          NroSerie: montaje.nroSerie,
+          EstadoCubierta: montaje.estadoCubierta,
+        }))
+      : [],
   };
 }
