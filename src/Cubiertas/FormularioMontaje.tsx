@@ -154,12 +154,10 @@ function FormularioMontaje() {
         setMostrarMensaje(false);
         setIdCubierta('');
         setIdColectivo('');
-        setIdUbicacion('');
         setMotivoCambio('');
         setCubiertaActual(null);
         setMostrarCartel(false);
         setConfirmarReemplazo(false);
-        setIdColectivo('');
         setIdUbicacion('0');
       }, 3000);
     }

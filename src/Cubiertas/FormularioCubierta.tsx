@@ -22,6 +22,24 @@ export default function FormularioCubierta() {
   const [editando, setEditando] = useState(false);
   const [montajeActual, setMontajeActual] = useState<{ nroColectivo: string; descripcionUbicacion: string } | null>(null);
 
+  const resetFormulario = (medidaInicial: string, limpiarEdicion = false) => {
+    setNroSerie('');
+    setMarca('');
+    setMedida(medidaInicial);
+    setFechaCompra('');
+    setEstado('Nueva');
+    setFechaRecapado('');
+    setFechaDobleRecapada('');
+    setFechaTripleRecapada('');
+    setMotivoCambio('');
+    setFechaEmparchada('');
+
+    if (limpiarEdicion) {
+      setEditando(false);
+      setMontajeActual(null);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje('');
@@ -75,19 +93,8 @@ export default function FormularioCubierta() {
       }
       setMostrarMensaje(true);
       setTimeout(() => setMostrarMensaje(false), 3000);
-      setNroSerie('');
-      setMarca('');
-      setMedida('');
-      setFechaCompra('');
-      setEstado('Nueva');
-      setFechaRecapado('');
-      setFechaDobleRecapada('');
-      setFechaTripleRecapada('');
-      setMotivoCambio('');
-  setEditando(false);
-  setMontajeActual(null);
-  setFechaEmparchada('');
-  return;
+      resetFormulario('', true);
+      return;
     }
     const result = await crearCubierta({
       NroSerie: nroSerie,
@@ -104,15 +111,7 @@ export default function FormularioCubierta() {
     setMostrarMensaje(true);
     setTimeout(() => setMostrarMensaje(false), 3000);
     if (result === 'Cubierta guardada correctamente') {
-      setNroSerie('');
-      setMarca('');
-      setMedida('295/80 R22.5');
-      setFechaCompra('');
-      setEstado('Nueva');
-      setFechaRecapado('');
-      setFechaDobleRecapada('');
-      setFechaTripleRecapada('');
-      setFechaEmparchada('');
+      resetFormulario('295/80 R22.5');
     }
   };
 

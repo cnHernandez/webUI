@@ -1,18 +1,12 @@
 import { apiService } from '../utils/apiService';
 import type { HistorialVtvDto } from '../Colectivos/types';
 
-export async function registrarVtv(nroColectivo: string | number, idColectivo: number, fechaRealizacion: string): Promise<HistorialVtvDto> {
+export async function registrarVtv(nroColectivo: string | number, fechaRealizacion: string): Promise<HistorialVtvDto> {
   const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const fechaReal = new Date(fechaRealizacion);
-  const fechaVenc = new Date(fechaReal);
-  fechaVenc.setFullYear(fechaVenc.getFullYear() + 1);
   const fechaRealStr = fechaReal.toISOString().slice(0, 10) + 'T00:00:00.000Z';
-  const fechaVencStr = fechaVenc.toISOString().slice(0, 10) + 'T00:00:00.000Z';
   const body = {
-    id: 0,
-    idColectivo: idColectivo,
     fechaRealizacion: fechaRealStr,
-    fechaVencimiento: fechaVencStr
   };
   const response = await apiService(`${apiHost}/api/colectivos/${nroColectivo}/historial-vtv`, {
     method: 'POST',

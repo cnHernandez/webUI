@@ -20,6 +20,30 @@ const ListaStockCubiertas: React.FC = () => {
   // Estado para colectivos desde la base de datos
   const [colectivosBD, setColectivosBD] = useState<{ idColectivo: number; nroColectivo: string }[]>([]);
 
+  const cargarCubiertas = async () => {
+    const data = await listarCubiertas();
+    setCubiertas(data);
+
+    const colectivos: { [idCubierta: number]: string } = {};
+    await Promise.all(
+      data.map(async (cubierta: any) => {
+        try {
+          const historial = await obtenerHistorialMontajeCubierta(cubierta.idCubierta);
+          if (Array.isArray(historial) && historial.length > 0) {
+            const actual = historial[0];
+            colectivos[cubierta.idCubierta] = actual.fechaDesinstalacion == null ? (actual.nroColectivo || '-') : '-';
+          } else {
+            colectivos[cubierta.idCubierta] = '-';
+          }
+        } catch {
+          colectivos[cubierta.idCubierta] = '-';
+        }
+      })
+    );
+
+    setColectivosCubierta(colectivos);
+  };
+
   // Obtener lista de colectivos desde la base de datos al montar
   useEffect(() => {
     listarColectivos()
@@ -34,34 +58,11 @@ const ListaStockCubiertas: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    // Usar el service listarCubiertas
-    listarCubiertas()
-      .then(async (data) => {
-        setCubiertas(data);
-        // Consultar colectivo actual para cada cubierta usando el service
-        const colectivos: { [idCubierta: number]: string } = {};
-        await Promise.all(
-          data.map(async (cubierta: any) => {
-            try {
-              const historial = await obtenerHistorialMontajeCubierta(cubierta.idCubierta);
-              // El primer elemento es el más reciente
-              if (Array.isArray(historial) && historial.length > 0) {
-                const actual = historial[0];
-                // Si no tiene fecha de desinstalación, está montada
-                colectivos[cubierta.idCubierta] = actual.fechaDesinstalacion == null ? (actual.nroColectivo || '-') : '-';
-              } else {
-                colectivos[cubierta.idCubierta] = '-';
-              }
-            } catch (err) {
-              colectivos[cubierta.idCubierta] = '-';
-            }
-          })
-        );
-        setColectivosCubierta(colectivos);
-      })
+    cargarCubiertas()
       .catch((err) => {
         console.error('Error al obtener cubiertas:', err);
         setCubiertas([]);
+        setColectivosCubierta({});
       });
   }, []);
 
@@ -93,29 +94,10 @@ const ListaStockCubiertas: React.FC = () => {
   if (cubiertaPerfilSerie !== null) {
     const handleVolver = () => {
       setCubiertaPerfilSerie(null);
-      // Recargar cubiertas al volver del perfil
-      listarCubiertas()
-        .then(async (data) => {
-          setCubiertas(data);
-          const colectivos: { [idCubierta: number]: string } = {};
-          await Promise.all(
-            data.map(async (cubierta: any) => {
-              try {
-                const historial = await obtenerHistorialMontajeCubierta(cubierta.idCubierta);
-                if (Array.isArray(historial) && historial.length > 0) {
-                  const actual = historial[0];
-                  colectivos[cubierta.idCubierta] = actual.fechaDesinstalacion == null ? (actual.nroColectivo || '-') : '-';
-                } else {
-                  colectivos[cubierta.idCubierta] = '-';
-                }
-              } catch (err) {
-                colectivos[cubierta.idCubierta] = '-';
-              }
-            })
-          );
-          setColectivosCubierta(colectivos);
-        })
-        .catch(() => setCubiertas([]));
+      cargarCubiertas().catch(() => {
+        setCubiertas([]);
+        setColectivosCubierta({});
+      });
     };
     return <PerfilCubierta nroSerie={cubiertaPerfilSerie} onVolver={handleVolver} />;
   }

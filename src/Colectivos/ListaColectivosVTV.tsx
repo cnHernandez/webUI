@@ -136,7 +136,7 @@ export default function ListaColectivosVTV() {
     setEnviando(true);
     setError(null);
     try {
-      await registrarVtv(modal.nro, modal.id, fecha);
+      await registrarVtv(modal.nro, fecha);
       setExito(true);
       setTimeout(() => {
         cerrarModal();

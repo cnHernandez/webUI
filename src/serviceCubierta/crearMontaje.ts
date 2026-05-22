@@ -7,13 +7,10 @@ export async function crearMontaje(data: {
   MotivoCambio?: string;
 }): Promise<string> {
   try {
-  const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/montajes`, {
+    const response = await apiService(`${import.meta.env.VITE_API_BASE_URL}/api/montajes`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...data,
-        FechaInstalacion: new Date().toISOString()
-      })
+      body: JSON.stringify(data)
     });
     if (response.ok) return 'Montaje guardado correctamente';
     return 'Error al guardar el montaje';
