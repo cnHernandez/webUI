@@ -14,7 +14,7 @@ function mapearEstado(estado: unknown, estadoDescripcion?: string): Colectivo['E
 }
 
 export async function obtenerColectivoPorNro(nroColectivo: string): Promise<Colectivo | null> {
-  const apiHost = import.meta.env.VITE_API_BASE_URL || 'http://3.145.26.78:8080';
+  const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const response = await apiService(`${apiHost}/api/colectivos/por-nro/${nroColectivo}`);
   if (!response.ok) return null;
   const data = await response.json();

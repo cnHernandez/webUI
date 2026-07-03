@@ -19,7 +19,7 @@ export async function crearEditarColectivo({
   kilometraje?: number;
   vtoVTV?: string;
 }): Promise<Response> {
-  const apiHost = import.meta.env.VITE_API_BASE_URL || 'http://3.145.26.78:8080';
+  const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   if (editando && idColectivoEditando) {
     return apiService(`${apiHost}/api/colectivos/${idColectivoEditando}`, {
       method: 'PUT',

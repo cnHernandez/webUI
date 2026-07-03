@@ -2,7 +2,7 @@ import { apiService } from '../utils/apiService';
 import type { HistorialVtvDto } from '../Colectivos/types';
 
 export async function registrarVtv(nroColectivo: string | number, fechaRealizacion: string): Promise<HistorialVtvDto> {
-  const apiHost = import.meta.env.VITE_API_BASE_URL || 'http://3.145.26.78:8080';
+  const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
   const fechaReal = new Date(fechaRealizacion);
   const fechaRealStr = fechaReal.toISOString().slice(0, 10) + 'T00:00:00.000Z';
   const body = {
