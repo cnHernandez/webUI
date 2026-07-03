@@ -15,7 +15,7 @@ function mapearEstado(estado: unknown, estadoDescripcion?: string): 'Activo' | '
 
 export async function listarColectivos(opciones?: { incluirSinAsignacion?: boolean; incluirDadasDeBaja?: boolean }): Promise<any[]> {
   try {
-    const apiHost = import.meta.env.VITE_API_BASE_URL || (window.location.hostname === 'localhost' ? 'http://localhost:5058' : 'http://api:80');
+    const apiHost = import.meta.env.VITE_API_BASE_URL || 'http://3.145.26.78:8080';
     const response = await apiService(`${apiHost}/api/colectivos`);
     if (response.ok) {
       const data = await response.json();
