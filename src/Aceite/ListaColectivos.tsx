@@ -100,9 +100,9 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 					.filter((c) => {
 						if (filtroNro && !String(c.NroColectivo).includes(filtroNro)) return false;
 						if (filtroProximos) {
-							const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
 							const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-							const kmDesdeCambio: number = kmActual - kmUltimo;
+							// Kilometraje se reinicia a cero al registrar cada cambio de aceite.
+							const kmDesdeCambio = kmActual;
 							const umbrales = obtenerUmbrales(c.NroColectivo);
 							if (kmDesdeCambio < umbrales.amarillo) return false;
 						}
@@ -173,7 +173,8 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 													const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
 													const fechaUltimo: string = typeof c.UltimoCambioAceite?.fecha === 'string' ? c.UltimoCambioAceite.fecha : '';
 													const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
-													const kmDesdeCambio: number = kmActual - kmUltimo;
+													// El kilometraje actual cuenta los km recorridos desde el último cambio.
+													const kmDesdeCambio = kmActual;
 													const umbrales = obtenerUmbrales(c.NroColectivo);
 													let rowClass = '';
 													// Colores dinámicos según el tipo de colectivo:
