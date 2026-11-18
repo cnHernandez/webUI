@@ -50,12 +50,6 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 			const handleSubmit = async (e: React.FormEvent) => {
 				e.preventDefault();
 				if (!modal) return;
-				const colectivo = colectivos.find(c => c.IdColectivo === modal.colectivoId);
-				const kmUltimo = typeof colectivo?.UltimoCambioAceite?.kilometros === 'number' && !isNaN(colectivo.UltimoCambioAceite.kilometros) ? colectivo.UltimoCambioAceite.kilometros : 0;
-				if (modal.kilometros === kmUltimo) {
-					setError('El kilometraje actual no puede ser igual al del último cambio de aceite.');
-					return;
-				}
 				setEnviando(true);
 				setError(null);
 				try {
@@ -163,15 +157,12 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 													<th className="border border-gray-300 p-2 text-center">Patente</th>
 													<th className="border border-gray-300 p-2 text-center">Modelo</th>
 													<th className="border border-gray-300 p-2 text-center">Kilometraje</th>
-													<th className="border border-gray-300 p-2 text-center">Km Último Cambio</th>
 													<th className="border border-gray-300 p-2 text-center">Acciones</th>
 												</tr>
 											</thead>
 											<tbody>
 												{colectivosFiltrados.map((c: Colectivo) => {
 
-													const kmUltimo: number = typeof c.UltimoCambioAceite?.kilometros === 'number' && !isNaN(c.UltimoCambioAceite.kilometros) ? c.UltimoCambioAceite.kilometros : 0;
-													const fechaUltimo: string = typeof c.UltimoCambioAceite?.fecha === 'string' ? c.UltimoCambioAceite.fecha : '';
 													const kmActual: number = typeof c.Kilometraje === 'number' && !isNaN(c.Kilometraje) ? c.Kilometraje : 0;
 													// El kilometraje actual cuenta los km recorridos desde el último cambio.
 													const kmDesdeCambio = kmActual;
@@ -181,11 +172,7 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 													// Colectivos especiales (cada 10000 km): Amarillo >=9000 km, Rojo >=10000 km
 													// Colectivos normales (cada 15000 km): Amarillo >=14000 km, Rojo >=15000 km
 													// Verde: desde el último cambio hasta umbral amarillo (incluye ok y normal)
-													const hoy = new Date().toISOString().slice(0, 10);
-													const esCambioHoy = fechaUltimo.slice(0, 10) === hoy;
-													if (kmUltimo === kmActual && esCambioHoy) {
-														rowClass = 'bg-green-500';
-													} else if (kmDesdeCambio >= umbrales.rojo) {
+													if (kmDesdeCambio >= umbrales.rojo) {
 														rowClass = 'bg-red-500';
 													} else if (kmDesdeCambio >= umbrales.amarillo) {
 														rowClass = 'bg-yellow-500';
@@ -198,7 +185,6 @@ const ListaColectivos: React.FC<ListaColectivosProps> = ({ tab = 'listado' }) =>
 															<td className="border border-gray-300 p-2 text-center">{c.Patente}</td>
 															<td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
 															<td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
-															<td className="border border-gray-300 p-2 text-center">{kmUltimo}</td>
 															<td className="border border-gray-300 p-2 text-center">
 																<button
 																	className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
