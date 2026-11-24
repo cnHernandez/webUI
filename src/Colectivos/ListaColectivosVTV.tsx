@@ -50,6 +50,17 @@ function obtenerCubiertasPorUbicacion(colectivo: Colectivo) {
   });
 }
 
+function obtenerKilometrajeReal(colectivo: Colectivo) {
+  const kilometrosUltimoCambio = colectivo.UltimoCambioAceite?.kilometros;
+  const kilometrosAcumulados = colectivo.Kilometraje;
+
+  if (kilometrosUltimoCambio == null && kilometrosAcumulados == null) {
+    return null;
+  }
+
+  return (kilometrosUltimoCambio ?? 0) + (kilometrosAcumulados ?? 0);
+}
+
 export default function ListaColectivosVTV() {
   const [cargando, setCargando] = useState(true);
   const [colectivos, setColectivos] = useState<Colectivo[]>([]);
@@ -247,7 +258,7 @@ export default function ListaColectivosVTV() {
                         <td className="border border-gray-300 p-2 text-center">{c.Patente || '-'}</td>
                         <td className="border border-gray-300 p-2 text-center">{c.Modelo || '-'}</td>
                         <td className="border border-gray-300 p-2 text-center">{c.Estado === 'DarDeBaja' ? 'Dado de baja' : c.Estado === 'FueraDeServicio' ? 'Fuera de Servicio' : 'Activo'}</td>
-                        <td className="border border-gray-300 p-2 text-center">{c.Kilometraje ?? '-'}</td>
+                        <td className="border border-gray-300 p-2 text-center">{obtenerKilometrajeReal(c) ?? '-'}</td>
                         <td className="border border-gray-300 p-2 text-center">{c.VtoVTV ? String(c.VtoVTV).slice(0,10) : '-'}</td>
                         <td className="border border-gray-300 p-2 text-center flex gap-2 justify-center">
                           <button
